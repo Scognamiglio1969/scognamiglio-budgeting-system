@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { createSeedProject } from './seed';
 import type { BudgetData, BudgetProject } from './types';
 
-const STORAGE_KEY = 'sbs-budget-project-v1';
+export const LEGACY_STORAGE_KEY = 'sbs-budget-project-v1';
 
 interface HistoryState {
   past: BudgetProject[];
@@ -10,18 +9,23 @@ interface HistoryState {
   future: BudgetProject[];
 }
 
-function loadProject(): BudgetProject {
+export function readLegacyProject(): BudgetProject | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (stored) return JSON.parse(stored) as BudgetProject;
   } catch {
-    // A malformed or unavailable local store should never block the application.
+    // A malformed legacy cache should never block cloud access.
   }
-  return createSeedProject();
+  return null;
 }
 
-export function useBudgetStore() {
-  const [history, setHistory] = useState<HistoryState>(() => ({ past: [], present: loadProject(), future: [] }));
+interface BudgetStoreOptions {
+  onPersist?: (project: BudgetProject) => void | Promise<void>;
+  persistDelay?: number;
+}
+
+export function useBudgetStore(initialProject: BudgetProject, options: BudgetStoreOptions = {}) {
+  const [history, setHistory] = useState<HistoryState>(() => ({ past: [], present: initialProject, future: [] }));
   const project = history.present;
   const activeScenario = useMemo(
     () => project.scenarios.find((scenario) => scenario.id === project.activeScenarioId) ?? project.scenarios[0],
@@ -29,8 +33,14 @@ export function useBudgetStore() {
   );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
-  }, [project]);
+    setHistory({ past: [], present: initialProject, future: [] });
+  }, [initialProject.id]);
+
+  useEffect(() => {
+    if (!options.onPersist) return;
+    const timer = window.setTimeout(() => void options.onPersist?.(project), options.persistDelay ?? 1200);
+    return () => window.clearTimeout(timer);
+  }, [project, options.onPersist, options.persistDelay]);
 
   const commit = useCallback((mutator: (draft: BudgetProject) => void, label = 'Budget updated') => {
     setHistory((current) => {
@@ -67,9 +77,8 @@ export function useBudgetStore() {
   }), []);
 
   const reset = useCallback(() => {
-    const fresh = createSeedProject();
-    setHistory((current) => ({ past: [...current.past, current.present], present: fresh, future: [] }));
-  }, []);
+    setHistory((current) => ({ past: [...current.past, current.present], present: initialProject, future: [] }));
+  }, [initialProject]);
 
   return {
     project,

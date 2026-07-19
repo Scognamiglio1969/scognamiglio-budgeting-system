@@ -128,7 +128,7 @@ export function BudgetView({ data, money, baseCurrency, focusAccountId, mutate }
             return (
               <div className="account-tree" key={account.id}>
                 <button className="hierarchy-row account-row" type="button" onClick={() => toggleSet(setExpandedAccounts, account.id)}>
-                  <div className="tree-label"><span className="chevron">{accountOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span><span className="code-pill">{account.code}</span><strong>{account.name}</strong><span className="row-count">{accountEntries.length}</span></div>
+                  <div className="tree-label"><span className="chevron">{accountOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</span><span className="code-pill">{account.code}</span><span className="account-copy"><strong>{account.name}</strong>{account.description && <small>{account.description}</small>}</span><span className="row-count">{accountEntries.length}</span></div>
                   <div /><div /><div /><div /><div /><div className="number">{money.format(accountTotals.base)}</div><div className="number">{money.format(accountTotals.fringe)}</div><div className="number strong-total">{money.format(accountTotals.total)}</div>
                 </button>
                 {accountOpen && categories.map((category) => {
