@@ -64,7 +64,7 @@ export interface SharedResource {
   updated_at: string;
 }
 
-export type SyncStatus = 'saved' | 'saving' | 'offline' | 'conflict' | 'error';
+export type SyncStatus = 'saved' | 'saving' | 'offline' | 'conflict' | 'error' | 'demo';
 
 export function cloudErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {

@@ -45,6 +45,7 @@ interface AppProps {
   onSignOut: () => void;
   onOpenAdmin: () => void;
   onRestored: (project: BudgetProject, version: number) => void;
+  demoMode?: boolean;
 }
 
 const syncCopy: Record<SyncStatus, { label: string; detail: string }> = {
@@ -53,10 +54,11 @@ const syncCopy: Record<SyncStatus, { label: string; detail: string }> = {
   offline: { label: 'Cache sicura', detail: 'offline' },
   conflict: { label: 'Versione protetta', detail: 'conflitto' },
   error: { label: 'Cache sicura', detail: 'da sincronizzare' },
+  demo: { label: 'Demo', detail: 'sola lettura' },
 };
 
 export default function App({
-  initialProject, profile, syncStatus, readOnly, onPersist, onBackProjects, onSignOut, onOpenAdmin, onRestored,
+  initialProject, profile, syncStatus, readOnly, onPersist, onBackProjects, onSignOut, onOpenAdmin, onRestored, demoMode = false,
 }: AppProps) {
   const store = useBudgetStore(initialProject, { onPersist });
   const { project, activeScenario } = store;
@@ -103,7 +105,7 @@ export default function App({
         <nav className="main-nav" aria-label="Navigazione principale">{navItems.map((item) => <button key={item.id} type="button" className={view === item.id ? 'active' : ''} onClick={() => navigate(item.id)}><span className="nav-icon">{item.icon}</span><span><strong>{item.label}</strong><small>{item.description}</small></span></button>)}</nav>
         <div className="sidebar-project">
           <span className="section-kicker">Progetto attivo</span><strong>{project.title}</strong><span>{project.company}</span>
-          <button className="project-switch" type="button" onClick={onBackProjects}><FolderKanban size={14} /> Tutti i progetti</button>
+          <button className="project-switch" type="button" onClick={onBackProjects}><FolderKanban size={14} /> {demoMode ? 'Torna all’accesso' : 'Tutti i progetti'}</button>
           <div className={`cloud-state cloud-${syncStatus}`}><Cloud size={14} /><span>{syncCopy[syncStatus].label}</span><em>{syncCopy[syncStatus].detail}</em></div>
         </div>
         <div className="sidebar-account">
@@ -122,15 +124,14 @@ export default function App({
           <div className="topbar-actions">
             <span className={`save-state save-${syncStatus}`}><span className="status-dot" /> {syncCopy[syncStatus].detail} · {relativeTime(project.updatedAt)}</span>
             <div className="undo-group"><button className="icon-button" disabled={!canUndo} onClick={undo} aria-label="Annulla"><Undo2 size={17} /></button><button className="icon-button" disabled={!canRedo} onClick={redo} aria-label="Ripristina"><Redo2 size={17} /></button></div>
-            <button className="icon-button" onClick={() => setVersionsOpen(true)} aria-label="Versioni cloud"><History size={17} /></button>
-            <input ref={fileInput} className="sr-only" type="file" accept=".json,.mbd,.mmbx" onChange={(event) => event.target.files?.[0] && void importFile(event.target.files[0])} />
-            <button className="button compact-button" onClick={() => fileInput.current?.click()}><Upload size={16} /> <span>Importa</span></button>
+            {!demoMode && <button className="icon-button" onClick={() => setVersionsOpen(true)} aria-label="Versioni cloud"><History size={17} /></button>}
+            {!demoMode && <><input ref={fileInput} className="sr-only" type="file" accept=".json,.mbd,.mmbx" onChange={(event) => event.target.files?.[0] && void importFile(event.target.files[0])} /><button className="button compact-button" onClick={() => fileInput.current?.click()}><Upload size={16} /> <span>Importa</span></button></>}
             <div className="export-menu-wrap"><button className="button primary compact-button" onClick={() => setExportOpen(!exportOpen)}><Download size={16} /> <span>Esporta</span><ChevronDown size={14} /></button>{exportOpen && <div className="export-menu"><button onClick={() => { window.print(); setExportOpen(false); }}><Printer size={16} /><span><strong>PDF / Stampa</strong><small>Report Topsheet</small></span></button><button onClick={() => { exportScenarioXlsx(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>Microsoft Excel</strong><small>Foglio .xlsx completo</small></span></button><button onClick={() => { exportScenarioCsv(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>CSV universale</strong><small>Compatibile con fogli di calcolo</small></span></button><button onClick={() => { exportProjectJson(project); setExportOpen(false); }}><FileJson size={16} /><span><strong>Archivio SBS</strong><small>Progetto JSON completo</small></span></button></div>}</div>
           </div>
         </header>
 
         <div className="content-area">
-          {readOnly && <div className="read-only-banner"><ShieldCheck size={15} /> Accesso in sola lettura · le modifiche sono disabilitate</div>}
+          {readOnly && <div className="read-only-banner"><ShieldCheck size={15} /> {demoMode ? 'Demo pubblica in sola lettura · dati sintetici, nessun salvataggio' : 'Accesso in sola lettura · le modifiche sono disabilitate'}</div>}
           {view === 'topsheet' && <TopsheetView scenario={activeScenario} money={money} onOpenAccount={openAccount} />}
           {view === 'budget' && <BudgetView data={activeScenario.data} money={money} baseCurrency={project.currency} focusAccountId={focusAccountId} mutate={mutateActiveData} />}
           {view === 'globals' && <GlobalsView data={activeScenario.data} baseCurrency={project.currency} mutate={mutateActiveData} />}

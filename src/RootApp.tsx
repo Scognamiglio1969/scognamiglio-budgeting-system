@@ -23,6 +23,40 @@ interface SelectedProject {
   canEdit: boolean;
 }
 
+const demoProfile: UserProfile = {
+  id: 'demo-user',
+  email: 'demo@sbs.local',
+  full_name: 'Visitatore demo',
+  role: 'user',
+  enabled: true,
+  must_change_password: false,
+  password_changed_at: null,
+  created_at: '2026-07-19T10:00:00.000Z',
+  updated_at: '2026-07-19T10:00:00.000Z',
+};
+
+function leaveDemo() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('demo');
+  window.location.assign(url.toString());
+}
+
+function DemoApplication() {
+  const [project] = useState(() => createSeedProject());
+  return <App
+    initialProject={project}
+    profile={demoProfile}
+    syncStatus="demo"
+    readOnly
+    demoMode
+    onPersist={() => undefined}
+    onBackProjects={leaveDemo}
+    onSignOut={leaveDemo}
+    onOpenAdmin={() => undefined}
+    onRestored={() => undefined}
+  />;
+}
+
 function AuthenticatedApplication({ session, profile, reloadProfile, recovery, clearRecovery }: {
   session: Session;
   profile: UserProfile;
@@ -181,7 +215,7 @@ function AuthenticatedApplication({ session, profile, reloadProfile, recovery, c
   return <><ProjectPortal profile={profile} projects={projects} loading={loading} legacyProject={readLegacyProject()} error={error} onOpenProject={(project) => void openProject(project)} onCreateProject={createProject} onArchiveProject={archiveProject} onOpenAdmin={() => setAdminOpen(true)} onDownloadBackup={downloadBackup} onSignOut={() => void signOut()} />{adminOpen && <AdminUsers currentUserId={session.user.id} onClose={() => setAdminOpen(false)} />}</>;
 }
 
-export default function RootApp() {
+function CloudRootApp() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -215,4 +249,9 @@ export default function RootApp() {
   if (!session) return <LoginScreen />;
   if (!profile) return <AccessDisabled onSignOut={() => void supabase?.auth.signOut()} />;
   return <AuthenticatedApplication session={session} profile={profile} reloadProfile={loadProfile} recovery={recovery} clearRecovery={() => setRecovery(false)} />;
+}
+
+export default function RootApp() {
+  const demoMode = new URLSearchParams(window.location.search).get('demo') === '1';
+  return demoMode ? <DemoApplication /> : <CloudRootApp />;
 }

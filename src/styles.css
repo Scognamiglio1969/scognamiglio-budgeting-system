@@ -83,7 +83,7 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
 .undo-group .icon-button + .icon-button { border-left: 1px solid var(--line); }
 .icon-button { display: inline-grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--line); border-radius: 8px; color: #625f6a; background: #fff; cursor: pointer; }
 .icon-button:hover:not(:disabled) { color: var(--purple); background: var(--purple-soft); }
-.button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 7px; padding: 7px 13px; border: 1px solid #dedbe5; border-radius: 8px; color: #4b4854; background: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; box-shadow: var(--shadow-sm); }
+.button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 7px; padding: 7px 13px; border: 1px solid #dedbe5; border-radius: 8px; color: #4b4854; background: #fff; font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; box-shadow: var(--shadow-sm); }
 .button:hover:not(:disabled) { border-color: #c9c4d6; background: #faf9fc; }
 .button.primary { border-color: var(--purple); color: #fff; background: var(--purple); }
 .button.primary:hover:not(:disabled) { border-color: var(--purple-dark); background: var(--purple-dark); }
@@ -91,6 +91,7 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
 .button.small { min-height: 31px; padding: 5px 9px; }
 .button.tiny { min-height: 28px; padding: 4px 8px; font-size: 10px; }
 .button.danger-button { border-color: #f1cbd0; color: var(--red); background: var(--red-soft); }
+.button.demo-access { width: 100%; min-height: 43px; color: var(--purple); border-color: #cfc6f5; background: var(--purple-soft); }
 .compact-button { min-height: 34px; }
 .export-menu-wrap { position: relative; }
 .export-menu { position: absolute; top: calc(100% + 9px); right: 0; z-index: 50; display: grid; width: 235px; padding: 7px; border: 1px solid var(--line); border-radius: 11px; background: #fff; box-shadow: 0 15px 45px rgba(31,26,43,.16); }
