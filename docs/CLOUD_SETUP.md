@@ -6,7 +6,7 @@
 - **Autenticazione:** Supabase Auth con email e password.
 - **Database:** PostgreSQL Supabase, preferibilmente in una regione europea.
 - **Autorizzazione:** Row Level Security su ogni tabella applicativa.
-- **Email password provvisoria:** Edge Function `admin-create-user` + Resend.
+- **Email accessi:** Edge Function `admin-create-user`; Resend per inviare la password, oppure link di cambio password tramite SMTP Supabase.
 - **Recupero:** storico completo in `project_versions`, copie dei conflitti e cache locale IndexedDB cifrata AES-GCM.
 
 Nel browser sono presenti solo la chiave pubblica Supabase e la sessione dell'utente. La chiave amministrativa rimane nella Edge Function e non deve mai essere aggiunta a GitHub o a un file `.env` pubblico.
@@ -38,7 +38,7 @@ Configurare inoltre:
 - Site URL: `https://scognamiglio1969.github.io/scognamiglio-budgeting-system/`
 - Redirect URL: `https://scognamiglio1969.github.io/scognamiglio-budgeting-system/**`
 
-## 3. Email delle password provvisorie
+## 3. Email degli accessi
 
 Creare un account Resend gratuito, verificare il dominio mittente e generare una API key. Impostare i secret della Edge Function:
 
@@ -55,7 +55,7 @@ Distribuire la funzione:
 supabase functions deploy admin-create-user
 ```
 
-La funzione verifica che il chiamante sia Admin, genera una password casuale forte, crea l'utente, invia l'email e annulla la creazione se la consegna fallisce. Il database rimuove il flag `must_change_password` solo quando Supabase registra un vero cambio password.
+La funzione verifica che il chiamante sia Admin, genera una password casuale forte, crea l'utente, invia l'email e annulla la creazione se la consegna fallisce. Se Resend non è configurato, usa il flusso di recupero password di Supabase e mostra la password provvisoria una sola volta all'Admin. Per inviare email a utenti che non appartengono al team Supabase è comunque necessario configurare un SMTP personalizzato gratuito. Il database rimuove il flag `must_change_password` solo quando Supabase registra un vero cambio password.
 
 ## 4. Collegare GitHub Pages
 

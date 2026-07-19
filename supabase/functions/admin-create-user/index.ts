@@ -45,7 +45,7 @@ export default {
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
   const appUrl = Deno.env.get('APP_URL');
 
-  if (!supabaseUrl || !serviceRoleKey || !resendKey || !fromEmail || !appUrl) {
+  if (!supabaseUrl || !serviceRoleKey || !appUrl) {
     return json({ error: 'Server configuration is incomplete' }, 500);
   }
 
@@ -93,30 +93,46 @@ export default {
     return json({ error: 'Unable to activate the user profile' }, 500);
   }
 
-  const safeName = escapeHtml(fullName || email);
-  const emailResponse = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: fromEmail,
-      to: [email],
-      subject: 'Accesso a Scognamiglio Budgeting System',
-      html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#24222d">
-        <h1 style="font-size:22px">Benvenuto in SBS</h1>
-        <p>Ciao ${safeName}, il tuo accesso a Scognamiglio Budgeting System è stato abilitato.</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}<br><strong>Password provvisoria:</strong> <code style="font-size:16px">${escapeHtml(temporaryPassword)}</code></p>
-        <p>Al primo accesso dovrai scegliere una nuova password prima di vedere i progetti.</p>
-        <p><a href="${escapeHtml(appUrl)}" style="display:inline-block;padding:11px 16px;background:#6550e8;color:white;text-decoration:none;border-radius:8px">Apri SBS</a></p>
-        <p style="color:#777482;font-size:12px">Non inoltrare questa email. Se non ti aspettavi l'invito, contatta l'amministratore.</p>
-      </div>`,
-    }),
-  });
+  if (resendKey && fromEmail) {
+    const safeName = escapeHtml(fullName || email);
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [email],
+        subject: 'Accesso a Scognamiglio Budgeting System',
+        html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#24222d">
+          <h1 style="font-size:22px">Benvenuto in SBS</h1>
+          <p>Ciao ${safeName}, il tuo accesso a Scognamiglio Budgeting System è stato abilitato.</p>
+          <p><strong>Email:</strong> ${escapeHtml(email)}<br><strong>Password provvisoria:</strong> <code style="font-size:16px">${escapeHtml(temporaryPassword)}</code></p>
+          <p>Al primo accesso dovrai scegliere una nuova password prima di vedere i progetti.</p>
+          <p><a href="${escapeHtml(appUrl)}" style="display:inline-block;padding:11px 16px;background:#6550e8;color:white;text-decoration:none;border-radius:8px">Apri SBS</a></p>
+          <p style="color:#777482;font-size:12px">Non inoltrare questa email. Se non ti aspettavi l'invito, contatta l'amministratore.</p>
+        </div>`,
+      }),
+    });
 
-  if (!emailResponse.ok) {
-    await admin.auth.admin.deleteUser(created.user.id);
-    return json({ error: 'Email delivery failed; the user was not created' }, 502);
+    if (!emailResponse.ok) {
+      await admin.auth.admin.deleteUser(created.user.id);
+      return json({ error: 'Email delivery failed; the user was not created' }, 502);
+    }
+
+    return json({ ok: true, userId: created.user.id, email, emailMode: 'temporary-password' });
   }
 
-  return json({ ok: true, userId: created.user.id, email });
+  const { error: recoveryError } = await caller.auth.resetPasswordForEmail(email, { redirectTo: appUrl });
+  if (recoveryError) {
+    await admin.auth.admin.deleteUser(created.user.id);
+    return json({ error: `Email delivery failed: ${recoveryError.message}` }, 502);
+  }
+
+  return json({
+    ok: true,
+    userId: created.user.id,
+    email,
+    emailMode: 'password-reset',
+    temporaryPassword,
+  });
   }),
 };
