@@ -1,3 +1,5 @@
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+import { withSupabase } from 'jsr:@supabase/server@^1';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -32,28 +34,22 @@ function escapeHtml(value: string) {
   })[character] ?? character);
 }
 
-Deno.serve(async (request) => {
+export default {
+  fetch: withSupabase({ auth: 'user' }, async (request, { supabase: caller }) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SECRET_KEY') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const resendKey = Deno.env.get('RESEND_API_KEY');
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
   const appUrl = Deno.env.get('APP_URL');
-  const authorization = request.headers.get('Authorization');
 
-  if (!supabaseUrl || !serviceRoleKey || !anonKey || !resendKey || !fromEmail || !appUrl) {
+  if (!supabaseUrl || !serviceRoleKey || !resendKey || !fromEmail || !appUrl) {
     return json({ error: 'Server configuration is incomplete' }, 500);
   }
-  if (!authorization?.startsWith('Bearer ')) return json({ error: 'Authentication required' }, 401);
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const caller = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authorization } },
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
@@ -122,4 +118,5 @@ Deno.serve(async (request) => {
   }
 
   return json({ ok: true, userId: created.user.id, email });
-});
+  }),
+};
