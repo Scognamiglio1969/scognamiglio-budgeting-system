@@ -1,60 +1,80 @@
 # Scognamiglio Budgeting System (SBS)
 
-SBS è un'applicazione professionale TypeScript per il budgeting di produzioni cinematografiche e audiovisive. La Cloud Edition gestisce più progetti, utenti autorizzati e risorse condivise con PostgreSQL, mantenendo una cache locale cifrata per il recupero.
+[Italiano](README.it.md) · [Live application](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
-Versione online: <https://scognamiglio1969.github.io/scognamiglio-budgeting-system/>
+SBS is an open-source production budgeting platform for film, television, documentary, commercial and audiovisual projects. It combines hierarchical budgets, reusable production resources, multi-project collaboration and a secure PostgreSQL backend.
 
-## Avvio
+> **Project status:** public beta. Use real production data only after reviewing the deployment, backup and security guidance.
+
+## Why SBS
+
+- **Production-native structure:** Topsheet → Accounts → Categories → Details.
+- **Powerful calculations:** Globals, formulas, fringes, contribution caps, currencies and tax incentives.
+- **Multi-project workspace:** separate budgets with shared departments, rates, packages and templates.
+- **Controlled collaboration:** Admin-managed users and project roles (`owner`, `editor`, `viewer`).
+- **Data ownership:** self-host the complete application and export an administrative JSON backup.
+- **Open format:** import/export SBS JSON, CSV, Excel and printable PDF reports.
+
+## Feature overview
+
+- Instant Topsheet totals and one-click hierarchical navigation.
+- Safe formula parser with global dependency recalculation.
+- Configurable union, tax and insurance fringes with wage caps.
+- Multiple currencies and editable exchange-rate tables.
+- Location and category-based production incentives.
+- Sub-budgets, independent scenarios and account-level comparisons.
+- Persistent undo/redo, audit trail and recoverable project versions.
+- Reusable line-item, crew-rate, equipment, global, fringe and group libraries.
+- Encrypted IndexedDB recovery cache and optimistic cloud autosave.
+- Guided legacy `.mbd`/`.mmbx` migration path.
+
+## Quick start
+
+Requirements: Node.js 20 or newer and a Supabase project.
 
 ```bash
+git clone https://github.com/Scognamiglio1969/scognamiglio-budgeting-system.git
+cd scognamiglio-budgeting-system
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Aprire `http://127.0.0.1:4173/`.
+Open `http://127.0.0.1:4173/`. Add your browser-safe Supabase URL and publishable key to `.env.local` before signing in.
 
-Per compilare e verificare il progetto:
+For the database, authentication and Edge Function setup, follow [Cloud setup](docs/CLOUD_SETUP.md). For an independent installation, see [Self-hosting](docs/SELF_HOSTING.md).
+
+## Validation
 
 ```bash
 npm test
 npm run build
 ```
 
-## Funzioni incluse
+## Architecture
 
-- Topsheet automatico con Account, Categorie e righe di Dettaglio.
-- Navigazione gerarchica, ricerca e filtri per account, gruppo e location.
-- Formule sicure con Globals e ricalcolo istantaneo delle dipendenze.
-- Fringe configurabili per tipologia, gruppi e massimali contributivi.
-- Multi-valuta per singola voce e tabella dei tassi di cambio.
-- Incentivi fiscali per location, tipologia, aliquota e cap.
-- Sub-budget per location o gruppo, scenari indipendenti e confronto per account.
-- Undo/redo e audit trail persistente.
-- Librerie di righe, pacchetti, Globals, Fringe e Gruppi.
-- Esportazione PDF tramite report di stampa, Excel `.xlsx`, CSV e archivio SBS JSON.
-- Importazione degli archivi SBS JSON.
-- Layout desktop/mobile e persistenza offline-first.
-- Dashboard multi-progetto con accessi `editor` e `viewer` per utente.
-- Login protetto, Admin, password provvisoria via email e cambio obbligatorio al primo accesso.
-- PostgreSQL con Row Level Security, versioni recuperabili e protezione dei conflitti.
-- Risorse condivise tra progetti: descrizioni reparto, librerie, crew rate, pacchetti e setup.
-- Backup amministrativo completo in JSON.
+- `src/engine.ts` — formulas and calculation engine.
+- `src/types.ts` — budget data model.
+- `src/store.ts` — autosave, history, undo and redo.
+- `src/RootApp.tsx` — authentication, project workspace and cloud sync.
+- `src/secureCache.ts` — AES-GCM encrypted IndexedDB recovery cache.
+- `src/views/` — operational budgeting views.
+- `src/exporters.ts` — CSV, JSON and OpenXML Excel exports.
+- `supabase/migrations/` — PostgreSQL schema, RLS and version history.
+- `supabase/functions/` — privileged user administration functions.
 
-## Compatibilità legacy e cloud
+## Legacy compatibility
 
-Il selettore accetta `.mbd` e `.mmbx` e apre il percorso guidato di migrazione. La lettura binaria diretta non è attivata perché il formato legacy non ha una specifica pubblica; il percorso verificabile è l'esportazione JSON Advanced da Movie Magic e il mapping verso SBS. La compatibilità diretta può essere completata validando il parser con file campione autorizzati.
+The file picker recognizes `.mbd` and `.mmbx` and opens a guided migration workflow. Direct binary parsing is not enabled because the legacy format has no public specification. The verifiable path is a Movie Magic JSON Advanced export mapped into SBS. Direct compatibility will require legally obtained sample files and repeatable validation fixtures.
 
-Il database cloud è PostgreSQL gestito da Supabase; il frontend rimane su GitHub Pages. Le istruzioni operative sono in [`docs/CLOUD_SETUP.md`](docs/CLOUD_SETUP.md).
+SBS is an independent project and is not affiliated with or endorsed by Movie Magic, Entertainment Partners, SAG-AFTRA, DGA or IATSE. Third-party names are used only to describe compatibility targets and production workflows.
 
-## Struttura
+## Contributing and security
 
-- `src/engine.ts`: parser formule e motore dei calcoli.
-- `src/types.ts`: modello dati del budget.
-- `src/store.ts`: autosave, cronologia, undo e redo.
-- `src/RootApp.tsx`: autenticazione, dashboard progetti e sincronizzazione cloud.
-- `src/secureCache.ts`: cache IndexedDB cifrata AES-GCM.
-- `src/views/`: viste operative.
-- `src/exporters.ts`: CSV, JSON e generatore Excel OpenXML.
-- `src/*.test.ts`: test dei calcoli e dell'export Excel.
-- `supabase/migrations/`: schema PostgreSQL, RLS e storico versioni.
-- `supabase/functions/`: funzioni server per l'amministrazione utenti.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Please report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/Scognamiglio1969/scognamiglio-budgeting-system/security/advisories/new), not through a public issue. See [SECURITY.md](SECURITY.md) for the complete policy.
+
+## License and trademarks
+
+Copyright © 2026 Massimo Scognamiglio.
+
+The source code is licensed under the [GNU Affero General Public License v3.0](LICENSE). The names **SBS**, **Scognamiglio Budgeting System**, and associated branding are not granted by the software license; see [TRADEMARKS.md](TRADEMARKS.md).

@@ -13,7 +13,7 @@ Nel browser sono presenti solo la chiave pubblica Supabase e la sessione dell'ut
 
 ## 1. Creare il progetto Supabase
 
-Creare un progetto gratuito denominato `sbs-scognamiglio-budgeting-system`, scegliendo una regione UE. Conservare la password del database in un password manager.
+Creare un progetto Supabase scegliendo una regione conforme ai propri requisiti. Conservare la password del database in un password manager.
 
 Dal SQL Editor eseguire integralmente:
 
@@ -35,8 +35,8 @@ La funzione non è invocabile dal browser. Dopo il bootstrap, disattivare le reg
 
 Configurare inoltre:
 
-- Site URL: `https://scognamiglio1969.github.io/scognamiglio-budgeting-system/`
-- Redirect URL: `https://scognamiglio1969.github.io/scognamiglio-budgeting-system/**`
+- Site URL: l'URL HTTPS esatto della propria installazione.
+- Redirect URL: lo stesso URL con il percorso consentito dalla propria installazione.
 
 ## 3. Email degli accessi
 
@@ -46,7 +46,7 @@ Creare un account Resend gratuito, verificare il dominio mittente e generare una
 supabase secrets set \
   RESEND_API_KEY=... \
   RESEND_FROM_EMAIL="SBS <accessi@DOMINIO>" \
-  APP_URL="https://scognamiglio1969.github.io/scognamiglio-budgeting-system/"
+  APP_URL="https://URL-DELLA-PROPRIA-INSTALLAZIONE/"
 ```
 
 Distribuire la funzione:

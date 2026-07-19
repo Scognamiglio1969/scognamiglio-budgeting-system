@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Scognamiglio1969/scognamiglio-budgeting-system/security/advisories/new
+    about: Report vulnerabilities privately; never publish them in an issue.

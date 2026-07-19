@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a reproducible SBS defect using synthetic data
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not attach real budgets, contracts, credentials or personal data. Report security issues privately."
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use a new project and synthetic values.
+      placeholder: "1. Create…\n2. Enter…\n3. Observe…"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "Commit SHA, release, or hosted version"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Calculations
+        - Budget editor
+        - Import or export
+        - Authentication and users
+        - Projects and shared resources
+        - Backup and recovery
+        - Accessibility or interface
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, operating system, hosted or self-hosted deployment.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed confidential production data, credentials and personal information.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
