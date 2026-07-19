@@ -4,6 +4,7 @@ export interface BudgetAccount {
   id: string;
   code: string;
   name: string;
+  description?: string;
 }
 
 export interface BudgetCategory {
@@ -126,7 +127,7 @@ export interface BudgetProject {
   scenarios: BudgetScenario[];
   libraries: BudgetLibrary[];
   changeLog: ChangeLogEntry[];
-  syncMode: 'local' | 'cloud-ready';
+  syncMode: 'local' | 'cloud';
   updatedAt: string;
 }
 
@@ -168,4 +169,4 @@ export interface IncentiveResult {
   amount: number;
 }
 
-export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries';
+export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries' | 'resources';
