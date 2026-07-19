@@ -1,10 +1,26 @@
 # Scognamiglio Budgeting System (SBS)
 
-[English](README.md) · [Applicazione online](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/) · [Roadmap](ROADMAP.md) · [Contribuire](CONTRIBUTING.md)
+[English](README.md) · [Prova la demo](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/?demo=1) · [Accesso Cloud](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/) · [Roadmap](ROADMAP.md) · [Contribuire](CONTRIBUTING.md)
 
 SBS è una piattaforma open source per il budgeting di produzioni cinematografiche, televisive, documentarie, pubblicitarie e audiovisive. Unisce budget gerarchici, risorse produttive riutilizzabili, collaborazione multi-progetto e un backend PostgreSQL protetto.
 
 > **Stato del progetto:** beta pubblica. Prima di utilizzare dati reali di produzione, verificare le indicazioni su distribuzione, backup e sicurezza.
+
+## Demo online
+
+Esplora un budget di produzione completo con dati sintetici senza creare un account. La demo pubblica è in sola lettura, non salva modifiche e non contiene dati reali di produzione.
+
+**[Apri la demo interattiva SBS →](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/?demo=1)**
+
+## Screenshot
+
+[![Topsheet SBS con totali di produzione, ripartizione per account e tax credit](docs/images/sbs-topsheet.jpg)](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/?demo=1)
+
+*Topsheet — totali aggiornati in tempo reale, ripartizione per account e incentivi stimati.*
+
+[![Budget gerarchico SBS con account, categorie e voci di dettaglio](docs/images/sbs-budget-detail.jpg)](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/?demo=1)
+
+*Dettaglio Budget — Account, Categorie e singole voci di costo navigabili.*
 
 ## Perché SBS
 
