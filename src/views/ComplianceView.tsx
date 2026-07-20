@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import {
-  AlertTriangle, BadgeCheck, Banknote, CalendarClock, ExternalLink, Globe2, Landmark,
+  AlertTriangle, BadgeCheck, Banknote, CalendarClock, ExternalLink, Globe2, Landmark, Link2,
   LoaderCircle, Search, ShieldCheck, UsersRound,
 } from 'lucide-react';
 import { cloudConfigured, searchOfficialLegislation, type LegalSearchResponse } from '../cloud';
 import {
   calculateCashFlow, calculateRiskRange, calculateTargetGap, COUNTRY_PROFILES,
-  DEFAULT_INTELLIGENCE, runBudgetHealthCheck,
+  normalizeIntelligence, runBudgetHealthCheck,
 } from '../intelligence';
 import type { BudgetProject } from '../types';
 import { ViewHeader } from '../components/ui';
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function ComplianceView({ project, money, readOnly, commit }: Props) {
-  const intelligence = project.intelligence ?? DEFAULT_INTELLIGENCE;
+  const intelligence = normalizeIntelligence(project.intelligence);
   const [query, setQuery] = useState(intelligence.jurisdiction.lastLegalQuery || 'tax credit produzione cinematografica');
   const [response, setResponse] = useState<LegalSearchResponse | null>(null);
   const [error, setError] = useState('');
@@ -31,9 +31,17 @@ export function ComplianceView({ project, money, readOnly, commit }: Props) {
   const critical = findings.filter((finding) => finding.severity === 'critical').length;
 
   const ensureIntelligence = (draft: BudgetProject) => {
-    if (!draft.intelligence) draft.intelligence = structuredClone(DEFAULT_INTELLIGENCE);
+    draft.intelligence = normalizeIntelligence(draft.intelligence);
     return draft.intelligence;
   };
+
+  const updateProvenance = (kind: 'fringe' | 'incentive', id: string, field: 'authority' | 'title' | 'sourceUrl' | 'effectiveFrom' | 'verifiedAt', value: string) => commit((draft) => {
+    const data = draft.scenarios.find((scenario) => scenario.id === draft.activeScenarioId)!.data;
+    const target = kind === 'fringe' ? data.fringes.find((item) => item.id === id) : data.incentives.find((item) => item.id === id);
+    if (!target) return;
+    target.provenance ??= { authority: '', title: '', sourceUrl: '', effectiveFrom: new Date().toISOString().slice(0, 10), verifiedAt: new Date().toISOString() };
+    target.provenance[field] = value;
+  }, `Rate provenance updated for ${id}`);
 
   const changeCountry = (countryCode: string) => {
     const country = COUNTRY_PROFILES.find((item) => item.code === countryCode) ?? COUNTRY_PROFILES[0];
@@ -90,6 +98,14 @@ export function ComplianceView({ project, money, readOnly, commit }: Props) {
         {error && <div className="inline-message error"><AlertTriangle size={15} /> {error}</div>}
         {response && <div className="legal-results"><div className="results-meta"><span>{response.total} atti trovati · {response.source.name}</span><span>Controllato {new Date(response.checkedAt).toLocaleString('it-IT')}</span></div>{response.results.map((result) => <a key={result.id} className="legal-result" href={result.sourceUrl} target="_blank" rel="noreferrer"><Landmark size={18} /><span><strong>{result.description || result.title}</strong><small>{[result.authority, result.actDate, result.officialGazette].filter(Boolean).join(' · ')}</small><em>{result.title}</em></span><ExternalLink size={15} /></a>)}</div>}
         {!response && <div className="legal-empty"><Landmark size={25} /><div><strong>Ricerca limitata a fonti istituzionali curate</strong><span>Per l’Italia SBS interroga Normattiva. Per gli altri paesi apre l’autorità ufficiale configurata; i connettori strutturati vengono abilitati singolarmente dopo la validazione.</span></div></div>}
+      </section>
+
+      <section className="panel provenance-panel">
+        <div className="panel-heading"><div><span className="section-kicker">Rate Provenance · 8</span><h2>Fonti delle regole applicate</h2></div><Link2 size={18} /></div>
+        <div className="provenance-list">{[
+          ...project.scenarios.find((scenario) => scenario.id === project.activeScenarioId)!.data.fringes.map((item) => ({ kind: 'fringe' as const, id: item.id, name: item.name, provenance: item.provenance })),
+          ...project.scenarios.find((scenario) => scenario.id === project.activeScenarioId)!.data.incentives.map((item) => ({ kind: 'incentive' as const, id: item.id, name: item.name, provenance: item.provenance })),
+        ].map((item) => <article key={`${item.kind}-${item.id}`}><div><strong>{item.name}</strong><span>{item.kind === 'fringe' ? 'Contributo' : 'Incentivo fiscale'}</span></div><input disabled={readOnly} placeholder="Autorità" value={item.provenance?.authority ?? ''} onChange={(event) => updateProvenance(item.kind, item.id, 'authority', event.target.value)} /><input disabled={readOnly} placeholder="Titolo fonte" value={item.provenance?.title ?? ''} onChange={(event) => updateProvenance(item.kind, item.id, 'title', event.target.value)} /><input disabled={readOnly} type="url" placeholder="https://fonte-ufficiale…" value={item.provenance?.sourceUrl ?? ''} onChange={(event) => updateProvenance(item.kind, item.id, 'sourceUrl', event.target.value)} /><input disabled={readOnly} type="date" value={item.provenance?.effectiveFrom ?? ''} onChange={(event) => updateProvenance(item.kind, item.id, 'effectiveFrom', event.target.value)} /><button disabled={readOnly} className="button" onClick={() => updateProvenance(item.kind, item.id, 'verifiedAt', new Date().toISOString())}><BadgeCheck size={14} /> Verifica oggi</button></article>)}</div>
       </section>
 
       <div className="intelligence-grid">

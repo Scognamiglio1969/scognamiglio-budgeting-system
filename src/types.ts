@@ -57,6 +57,7 @@ export interface TaxIncentive {
   locations: string[];
   kinds: LineKind[];
   provenance?: RateProvenance;
+  stackable?: boolean;
 }
 
 export interface RateProvenance {
@@ -90,6 +91,7 @@ export interface LineItem {
   entityId?: string | null;
   rateProvenance?: RateProvenance;
   risk?: RiskEstimate;
+  flexibilityPercent?: number;
 }
 
 export interface ProjectJurisdiction {
@@ -120,12 +122,34 @@ export interface CashFlowEntry {
   entityId?: string | null;
 }
 
+export interface ProductionSchedule {
+  startDate: string;
+  prepWeeks: number;
+  shootDays: number;
+  wrapWeeks: number;
+  workDaysPerWeek: number;
+}
+
+export interface DepartmentRoom {
+  id: string;
+  name: string;
+  accountIds: string[];
+  ownerLabel: string;
+  status: 'draft' | 'submitted' | 'approved' | 'locked';
+  note: string;
+  updatedAt: string;
+}
+
 export interface ProjectIntelligence {
   jurisdiction: ProjectJurisdiction;
   productionEntities: ProductionEntity[];
   cashFlow: CashFlowEntry[];
   targetBudget: number | null;
   benchmarkOptIn: boolean;
+  productionType: 'film' | 'tv' | 'documentary' | 'commercial' | 'other';
+  benchmarkSubmittedAt: string | null;
+  schedule: ProductionSchedule;
+  departmentRooms: DepartmentRoom[];
 }
 
 export interface BudgetData {
@@ -148,6 +172,8 @@ export interface BudgetScenario {
   isBase: boolean;
   scope: string;
   data: BudgetData;
+  branchStatus?: 'working' | 'review' | 'merged' | 'archived';
+  mergedAt?: string | null;
 }
 
 export interface LibraryItem {
@@ -226,4 +252,4 @@ export interface IncentiveResult {
   amount: number;
 }
 
-export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries' | 'resources' | 'compliance';
+export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries' | 'resources' | 'compliance' | 'lab';

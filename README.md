@@ -48,6 +48,21 @@ Explore a complete synthetic production budget without creating an account. The 
 - Auditable legal searches, official-source links and a strict no-auto-apply workflow.
 - Rate and incentive provenance, coproduction shares, cash-flow pressure, target gap and risk range.
 
+## Production Intelligence — 12 moduli
+
+1. **Coproduction Engine:** entità, quote, valute e assegnazione delle singole voci.
+2. **Tax Credit Optimizer:** simulazione delle location, massimali e incentivi non cumulabili.
+3. **Probabilistic Simulation:** Monte Carlo seedabile con percentili P10/P50/P80/P90.
+4. **Target Budget Solver:** piano di riduzioni entro la flessibilità autorizzata.
+5. **Schedule-to-Budget:** calendario collegato alle Globali e impatto economico preventivo.
+6. **Cash-flow:** movimenti previsionali, impegnati e pagati con picco di fabbisogno.
+7. **Budget Health Check:** anomalie strutturali, fonti mancanti, cambi scaduti e quote errate.
+8. **Rate Provenance:** autorità, documento, URL, decorrenza e data di verifica.
+9. **Department Budget Rooms:** perimetri di account, responsabili e stati di approvazione.
+10. **Budget Branches:** branch indipendenti, revisione, confronto e merge nel master.
+11. **Open SBS Standard 2.0:** envelope versionato, schema JSON e migrazione del formato legacy.
+12. **Anonymous Benchmarks:** opt-in, sole metriche aggregate e risultati nascosti sotto 5 campioni.
+
 ## Quick start
 
 Requirements: Node.js 20 or newer and a Supabase project.
@@ -75,6 +90,8 @@ npm run build
 
 - `src/engine.ts` — formulas and calculation engine.
 - `src/intelligence.ts` — deterministic compliance, risk, cash-flow and target checks.
+- `src/innovation.ts` — coproduction, tax optimization, Monte Carlo, solver, schedule and benchmarks.
+- `src/openSbs.ts` — Open SBS 2.0 validation, migration and serialization.
 - `src/types.ts` — budget data model.
 - `src/store.ts` — autosave, history, undo and redo.
 - `src/RootApp.tsx` — authentication, project workspace and cloud sync.
@@ -84,6 +101,7 @@ npm run build
 - `supabase/migrations/` — PostgreSQL schema, RLS and version history.
 - `supabase/functions/` — privileged user administration functions.
 - `supabase/functions/legal-search/` — authenticated allowlisted official-source search.
+- `supabase/functions/benchmark-submit/` — privacy-limited anonymous cohort submission.
 
 ## Legal data integrity
 

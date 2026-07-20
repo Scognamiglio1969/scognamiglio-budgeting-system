@@ -1,6 +1,7 @@
 import { evaluateBudget } from './engine';
 import type { BudgetProject, BudgetScenario } from './types';
 import { strToU8, zipSync } from 'fflate';
+import { serializeOpenSbs } from './openSbs';
 
 function download(name: string, content: string, type: string) {
   const url = URL.createObjectURL(new Blob([content], { type }));
@@ -26,7 +27,7 @@ function slug(value: string) {
 }
 
 export function exportProjectJson(project: BudgetProject) {
-  download(`sbs-${slug(project.title)}.json`, JSON.stringify(project, null, 2), 'application/json');
+  download(`sbs-${slug(project.title)}.open-sbs.json`, serializeOpenSbs(project), 'application/vnd.open-sbs+json');
 }
 
 export function exportScenarioCsv(project: BudgetProject, scenario: BudgetScenario) {

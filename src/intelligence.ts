@@ -26,7 +26,20 @@ export const DEFAULT_INTELLIGENCE: ProjectIntelligence = {
     euApplicable: true, lastLegalCheckAt: null, lastLegalQuery: '',
   },
   productionEntities: [], cashFlow: [], targetBudget: null, benchmarkOptIn: false,
+  productionType: 'film', benchmarkSubmittedAt: null,
+  schedule: { startDate: new Date().toISOString().slice(0, 10), prepWeeks: 4, shootDays: 20, wrapWeeks: 2, workDaysPerWeek: 5 },
+  departmentRooms: [],
 };
+
+export function normalizeIntelligence(value: ProjectIntelligence | undefined): ProjectIntelligence {
+  return {
+    ...structuredClone(DEFAULT_INTELLIGENCE), ...(value ?? {}),
+    jurisdiction: { ...DEFAULT_INTELLIGENCE.jurisdiction, ...(value?.jurisdiction ?? {}) },
+    schedule: { ...DEFAULT_INTELLIGENCE.schedule, ...(value?.schedule ?? {}) },
+    productionEntities: value?.productionEntities ?? [], cashFlow: value?.cashFlow ?? [],
+    departmentRooms: value?.departmentRooms ?? [],
+  };
+}
 
 export interface HealthFinding {
   id: string;

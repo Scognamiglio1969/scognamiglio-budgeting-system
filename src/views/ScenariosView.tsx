@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowRight, Check, CirclePlus, Clock3, GitCompareArrows, History, Layers2, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, CirclePlus, Clock3, GitCompareArrows, GitMerge, History, Layers2, Send, Trash2 } from 'lucide-react';
 import { accountItems, relativeTime, uid } from '../helpers';
 import { calculateBudgetTotals, evaluateBudget, sumEvaluated } from '../engine';
 import type { BudgetProject, BudgetScenario } from '../types';
@@ -35,6 +35,7 @@ export function ScenariosView({ project, money, commit }: Props) {
     const scenario: BudgetScenario = {
       id: uid('scenario'), name: name.trim(), description: scopeType === 'all' ? 'Scenario di lavoro' : 'Sub-budget indipendente',
       createdAt: new Date().toISOString(), basedOn: active.id, isBase: false, scope, data,
+      branchStatus: 'working', mergedAt: null,
     };
     commit((draft) => { draft.scenarios.push(scenario); draft.activeScenarioId = scenario.id; }, `Scenario “${scenario.name}” created`);
     setCompareB(scenario.id); setName('');
@@ -58,6 +59,21 @@ export function ScenariosView({ project, money, commit }: Props) {
   const totalA = scenarioA ? calculateBudgetTotals(scenarioA.data).net : 0;
   const totalB = scenarioB ? calculateBudgetTotals(scenarioB.data).net : 0;
 
+  const submitBranch = () => commit((draft) => {
+    const branch = draft.scenarios.find((scenario) => scenario.id === draft.activeScenarioId);
+    if (branch && !branch.isBase) branch.branchStatus = 'review';
+  }, `Branch “${active.name}” submitted for review`);
+
+  const mergeBranch = () => commit((draft) => {
+    const branch = draft.scenarios.find((scenario) => scenario.id === draft.activeScenarioId);
+    const master = draft.scenarios.find((scenario) => scenario.isBase) ?? draft.scenarios[0];
+    if (!branch || branch.isBase || branch.branchStatus !== 'review') return;
+    master.data = structuredClone(branch.data);
+    branch.branchStatus = 'merged';
+    branch.mergedAt = new Date().toISOString();
+    draft.activeScenarioId = master.id;
+  }, `Branch “${active.name}” merged into master`);
+
   return (
     <div className="view-shell">
       <ViewHeader eyebrow="Analisi" title="Scenari e sub-budget" description="Sperimenta senza toccare il master, poi confronta ogni versione account per account." />
@@ -69,7 +85,7 @@ export function ScenariosView({ project, money, commit }: Props) {
             const selected = scenario.id === project.activeScenarioId;
             return <article className={`scenario-row ${selected ? 'selected' : ''}`} key={scenario.id}>
               <button type="button" className="scenario-select" onClick={() => commit((draft) => { draft.activeScenarioId = scenario.id; }, `Switched to “${scenario.name}”`)}>
-                <span className="scenario-radio">{selected && <Check size={13} />}</span><span className="scenario-copy"><span><strong>{scenario.name}</strong>{scenario.isBase && <em>MASTER</em>}</span><small>{scenario.scope} · {scenario.data.items.length} voci</small></span><span className="scenario-cost">{money.format(totals.net)}<small>netto</small></span>
+                <span className="scenario-radio">{selected && <Check size={13} />}</span><span className="scenario-copy"><span><strong>{scenario.name}</strong>{scenario.isBase && <em>MASTER</em>}{!scenario.isBase && <em>{(scenario.branchStatus ?? 'working').toUpperCase()}</em>}</span><small>{scenario.scope} · {scenario.data.items.length} voci</small></span><span className="scenario-cost">{money.format(totals.net)}<small>netto</small></span>
               </button>
               {!scenario.isBase && <button className="row-action danger scenario-delete" onClick={() => commit((draft) => { draft.scenarios = draft.scenarios.filter((value) => value.id !== scenario.id); if (draft.activeScenarioId === scenario.id) draft.activeScenarioId = draft.scenarios[0].id; }, `Scenario “${scenario.name}” deleted`)}><Trash2 size={15} /></button>}
             </article>;
@@ -82,6 +98,7 @@ export function ScenariosView({ project, money, commit }: Props) {
             {scopeType === 'location' && <label className="field"><span>Location</span><select value={scopeValue} onChange={(event) => setScopeValue(event.target.value)}><option value="">Seleziona…</option>{locations.map((location) => <option key={location}>{location}</option>)}</select></label>}
             <button className="button primary full-button" disabled={!name.trim() || (scopeType !== 'all' && !scopeValue)} onClick={createScenario}><Layers2 size={16} /> Crea e apri</button>
           </div>
+          {!active.isBase && <div className="branch-workflow"><span className="section-kicker">Budget Branch · {(active.branchStatus ?? 'working').toUpperCase()}</span>{(active.branchStatus ?? 'working') === 'working' && <button className="button full-button" onClick={submitBranch}><Send size={15} /> Invia in revisione</button>}{active.branchStatus === 'review' && <button className="button primary full-button" onClick={mergeBranch}><GitMerge size={15} /> Merge nel master</button>}{active.branchStatus === 'merged' && <p>Branch integrato {active.mergedAt ? relativeTime(active.mergedAt) : ''}. Il master contiene ora questo budget.</p>}</div>}
         </section>
 
         <div className="scenario-main">

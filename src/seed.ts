@@ -158,6 +158,13 @@ export function createSeedProject(): BudgetProject {
       ],
       targetBudget: 900000,
       benchmarkOptIn: false,
+      productionType: 'film',
+      benchmarkSubmittedAt: null,
+      schedule: { startDate: '2026-08-03', prepWeeks: 4, shootDays: 24, wrapWeeks: 2, workDaysPerWeek: 5 },
+      departmentRooms: [
+        { id: 'room-camera', name: 'Camera & Lighting Room', accountIds: ['acc-4000'], ownerLabel: 'Direzione fotografia', status: 'submitted', note: 'Package e fabbisogno crew pronti per revisione.', updatedAt: '2026-07-19T10:00:00.000Z' },
+        { id: 'room-art', name: 'Art Department Room', accountIds: ['acc-5000'], ownerLabel: 'Production designer', status: 'draft', note: 'Preventivi scenografia in aggiornamento.', updatedAt: '2026-07-19T10:00:00.000Z' },
+      ],
     },
   };
 }

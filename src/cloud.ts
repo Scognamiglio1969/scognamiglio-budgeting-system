@@ -98,6 +98,20 @@ export async function searchOfficialLegislation(countryCode: string, query: stri
   return data;
 }
 
+export interface BenchmarkAggregate {
+  cohortSize: number;
+  withheld: boolean;
+  averages?: { costPerShootDay: number; laborShare: number; equipmentShare: number; fringeShare: number; incentiveShare: number };
+}
+
+export async function submitAnonymousBenchmark(metrics: Record<string, unknown>) {
+  if (!supabase) throw new Error('Cloud non configurato');
+  const { data, error } = await supabase.functions.invoke<BenchmarkAggregate>('benchmark-submit', { body: { metrics } });
+  if (error) throw error;
+  if (!data) throw new Error('Risposta benchmark vuota');
+  return data;
+}
+
 export function cloudErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
     return error.message;

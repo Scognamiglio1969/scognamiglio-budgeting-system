@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateExpression, evaluateItem } from './engine';
+import { calculateBudgetTotals, evaluateExpression, evaluateItem } from './engine';
 import type { BudgetData, LineItem } from './types';
 
 const globals = [
@@ -18,6 +18,17 @@ describe('formula engine', () => {
   it('rejects unknown globals and division by zero', () => {
     expect(() => evaluateExpression('MISSING * 2', globals)).toThrow('Unknown global');
     expect(() => evaluateExpression('4 / 0', globals)).toThrow('Division by zero');
+  });
+});
+
+describe('tax incentive engine', () => {
+  it('selects only the strongest mutually exclusive incentive', () => {
+    const item: LineItem = { id: 'i1', categoryId: 'c1', description: 'Spend', kind: 'other', quantity: '1', units: '1', rate: '1000', multiplier: '1', currency: 'EUR', groupId: null, location: 'Rome', note: '' };
+    const data: BudgetData = { accounts: [], categories: [], items: [item], globals: [], groups: [], fringes: [], exchangeRates: [{ id: 'eur', currency: 'EUR', name: 'Euro', rateToBase: 1, updatedAt: '' }], incentives: [
+      { id: 'a', name: 'A', jurisdiction: 'IT', rate: 20, cap: null, locations: ['Rome'], kinds: ['other'], stackable: false },
+      { id: 'b', name: 'B', jurisdiction: 'IT', rate: 30, cap: null, locations: ['Rome'], kinds: ['other'], stackable: false },
+    ] };
+    expect(calculateBudgetTotals(data).incentive).toBe(300);
   });
 });
 
