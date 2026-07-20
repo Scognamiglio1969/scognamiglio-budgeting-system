@@ -580,6 +580,9 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
 .lab-tabs { display: flex; overflow-x: auto; gap: 5px; margin-bottom: 15px; padding: 5px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
 .lab-tabs button { display: inline-flex; min-height: 35px; align-items: center; gap: 6px; padding: 0 10px; border: 0; border-radius: 7px; color: var(--muted); background: transparent; font-size: 9px; white-space: nowrap; cursor: pointer; }
 .lab-tabs button.active { color: var(--purple); background: var(--purple-soft); font-weight: 700; }
+.lab-action-result { display: flex; align-items: center; gap: 10px; margin: -5px 0 15px; padding: 11px 13px; border: 1px solid #9ed8ba; border-radius: 9px; color: #185c3b; background: #effaf4; font-size: 9px; }
+.lab-action-result strong { white-space: nowrap; }
+.lab-action-result span { color: #27694a; }
 .lab-panel { padding: 18px; }
 .lab-title { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 17px; }
 .lab-title > span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 8px; color: #fff; background: var(--purple); font-size: 10px; font-weight: 800; }

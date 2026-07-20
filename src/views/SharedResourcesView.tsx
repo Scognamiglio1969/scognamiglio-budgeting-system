@@ -11,14 +11,23 @@ interface Props {
   data: BudgetData;
   commit: (mutator: (project: BudgetProject) => void, label?: string) => void;
   mutate: (mutator: (data: BudgetData) => void, label?: string) => void;
+  demoMode?: boolean;
 }
 
 const typeLabels: Record<SharedResource['resource_type'], string> = {
   department: 'Reparto', library: 'Libreria', 'rate-card': 'Listino', 'fringe-set': 'Fringe', text: 'Nota',
 };
 
-export function SharedResourcesView({ profile, project, data, commit, mutate }: Props) {
-  const [resources, setResources] = useState<SharedResource[]>([]);
+const demoResources: SharedResource[] = [{
+  id: 'demo-resource-production', resource_type: 'department', name: 'Descrizione reparto Produzione',
+  description: 'Perimetro operativo riutilizzabile per il reparto Produzione.',
+  payload: { body: 'Coordina piano di lavorazione, logistica, autorizzazioni e comunicazioni tra i reparti.' },
+  tags: ['demo', 'produzione'], archived: false, created_by: 'demo-user', updated_by: 'demo-user',
+  created_at: '2026-07-20T10:00:00.000Z', updated_at: '2026-07-20T10:00:00.000Z',
+}];
+
+export function SharedResourcesView({ profile, project, data, commit, mutate, demoMode = false }: Props) {
+  const [resources, setResources] = useState<SharedResource[]>(demoMode ? demoResources : []);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -31,21 +40,27 @@ export function SharedResourcesView({ profile, project, data, commit, mutate }: 
   const [sourceLibrary, setSourceLibrary] = useState(project.libraries[0]?.id ?? '');
 
   const load = useCallback(async () => {
+    if (demoMode) { setResources(demoResources); setLoading(false); return; }
     if (!supabase) return;
     setLoading(true);
     const { data: result, error } = await supabase.from('shared_resources').select('*').eq('archived', false).order('updated_at', { ascending: false });
     if (error) setMessage({ type: 'error', text: cloudErrorMessage(error) });
     else setResources((result ?? []) as SharedResource[]);
     setLoading(false);
-  }, []);
+  }, [demoMode]);
 
   useEffect(() => { void load(); }, [load]);
   const filtered = useMemo(() => resources.filter((resource) => `${resource.name} ${resource.description} ${resource.tags.join(' ')}`.toLowerCase().includes(query.toLowerCase())), [resources, query]);
 
   const shareDepartment = async () => {
-    if (!supabase || !resourceName.trim() || !resourceDescription.trim()) return;
+    if (!resourceName.trim() || !resourceDescription.trim()) return;
     setBusy(true); setMessage(null);
     const source = data.accounts.find((account) => account.id === sourceAccount);
+    if (demoMode) {
+      setResources((current) => [{ id: uid('resource'), resource_type: 'department', name: resourceName.trim(), description: resourceDescription.trim().slice(0, 180), payload: { body: resourceDescription.trim(), sourceCode: source?.code ?? '', sourceName: source?.name ?? '' }, tags: resourceTags.split(',').map((tag) => tag.trim()).filter(Boolean), archived: false, created_by: profile.id, updated_by: profile.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...current]);
+      setMessage({ type: 'success', text: 'Risorsa creata nella sandbox. Verrà rimossa al ricaricamento.' }); setBusy(false); return;
+    }
+    if (!supabase) { setBusy(false); return; }
     const { error } = await supabase.from('shared_resources').insert({
       resource_type: 'department', name: resourceName.trim(), description: resourceDescription.trim().slice(0, 180),
       payload: { body: resourceDescription.trim(), sourceCode: source?.code ?? '', sourceName: source?.name ?? '' },
@@ -57,10 +72,14 @@ export function SharedResourcesView({ profile, project, data, commit, mutate }: 
   };
 
   const shareLibrary = async () => {
-    if (!supabase) return;
     const library = project.libraries.find((item) => item.id === sourceLibrary);
     if (!library) return;
     setBusy(true); setMessage(null);
+    if (demoMode) {
+      setResources((current) => [{ id: uid('resource'), resource_type: 'library', name: library.name, description: library.description, payload: { library: structuredClone(library) }, tags: [library.type], archived: false, created_by: profile.id, updated_by: profile.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...current]);
+      setMessage({ type: 'success', text: 'Libreria pubblicata nella sandbox.' }); setBusy(false); return;
+    }
+    if (!supabase) { setBusy(false); return; }
     const { error } = await supabase.from('shared_resources').insert({
       resource_type: 'library', name: library.name, description: library.description, payload: { library }, tags: [library.type],
       created_by: profile.id, updated_by: profile.id,
@@ -88,7 +107,9 @@ export function SharedResourcesView({ profile, project, data, commit, mutate }: 
   };
 
   const remove = async (resource: SharedResource) => {
-    if (!supabase || !window.confirm(`Rimuovere “${resource.name}” dalle risorse condivise?`)) return;
+    if (!window.confirm(`Rimuovere “${resource.name}” dalle risorse condivise?`)) return;
+    if (demoMode) { setResources((current) => current.filter((item) => item.id !== resource.id)); setMessage({ type: 'success', text: 'Risorsa rimossa dalla sandbox.' }); return; }
+    if (!supabase) return;
     setBusy(true);
     const { error } = await supabase.from('shared_resources').update({ archived: true, updated_by: profile.id }).eq('id', resource.id);
     if (error) setMessage({ type: 'error', text: cloudErrorMessage(error) }); else await load();

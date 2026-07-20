@@ -53,7 +53,7 @@ const syncCopy: Record<SyncStatus, { label: string; detail: string }> = {
   offline: { label: 'Cache sicura', detail: 'offline' },
   conflict: { label: 'Versione protetta', detail: 'conflitto' },
   error: { label: 'Cache sicura', detail: 'da sincronizzare' },
-  demo: { label: 'Demo', detail: 'sola lettura' },
+  demo: { label: 'Demo', detail: 'sandbox locale' },
 };
 
 export default function App({
@@ -130,16 +130,17 @@ export default function App({
         </header>
 
         <div className="content-area">
-          {readOnly && <div className="read-only-banner"><ShieldCheck size={15} /> {demoMode ? 'Demo pubblica in sola lettura · dati sintetici, nessun salvataggio' : 'Accesso in sola lettura · le modifiche sono disabilitate'}</div>}
+          {demoMode && <div className="read-only-banner"><Sparkles size={15} /> Sandbox interattiva · puoi provare ogni modifica; al ricaricamento i dati dimostrativi vengono ripristinati</div>}
+          {readOnly && !demoMode && <div className="read-only-banner"><ShieldCheck size={15} /> Accesso in sola lettura · le modifiche sono disabilitate</div>}
           {view === 'topsheet' && <TopsheetView scenario={activeScenario} money={money} onOpenAccount={openAccount} />}
           {view === 'budget' && <BudgetView data={activeScenario.data} money={money} baseCurrency={project.currency} focusAccountId={focusAccountId} mutate={mutateActiveData} />}
           {view === 'globals' && <GlobalsView data={activeScenario.data} baseCurrency={project.currency} mutate={mutateActiveData} />}
           {view === 'fringes' && <FringesView data={activeScenario.data} money={money} mutate={mutateActiveData} />}
           {view === 'scenarios' && <ScenariosView project={project} money={money} commit={commit} />}
           {view === 'libraries' && <LibrariesView project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
-          {view === 'resources' && <SharedResourcesView profile={profile} project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
-          {view === 'compliance' && <ComplianceView project={project} money={money} readOnly={readOnly} commit={commit} />}
-          {view === 'lab' && <InnovationLabView project={project} money={money} readOnly={readOnly} commit={commit} />}
+          {view === 'resources' && <SharedResourcesView profile={profile} project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} demoMode={demoMode} />}
+          {view === 'compliance' && <ComplianceView project={project} money={money} readOnly={readOnly} commit={commit} demoMode={demoMode} />}
+          {view === 'lab' && <InnovationLabView project={project} money={money} readOnly={readOnly} commit={commit} demoMode={demoMode} />}
         </div>
       </main>
 

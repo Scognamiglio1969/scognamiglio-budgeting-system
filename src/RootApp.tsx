@@ -47,7 +47,7 @@ function DemoApplication() {
     initialProject={project}
     profile={demoProfile}
     syncStatus="demo"
-    readOnly
+    readOnly={false}
     demoMode
     onPersist={() => undefined}
     onBackProjects={leaveDemo}

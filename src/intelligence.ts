@@ -70,6 +70,10 @@ export function runBudgetHealthCheck(project: BudgetProject): HealthFinding[] {
   if (staleFx.length) findings.push({ id: 'fx-stale', severity: 'warning', title: `${staleFx.length} cambi da aggiornare`, detail: `Tassi oltre 30 giorni: ${staleFx.map((rate) => rate.currency).join(', ')}.` });
   const shares = intelligence.productionEntities.reduce((sum, entity) => sum + entity.sharePercent, 0);
   if (intelligence.productionEntities.length && Math.abs(shares - 100) > 0.01) findings.push({ id: 'shares', severity: 'critical', title: `Quote di coproduzione al ${shares.toFixed(1)}%`, detail: 'Le quote delle entità devono totalizzare il 100%.' });
+  if (intelligence.productionEntities.some((entity) => entity.sharePercent < 0)) findings.push({ id: 'negative-shares', severity: 'critical', title: 'Quote di coproduzione negative', detail: 'Ogni quota deve essere maggiore o uguale a zero.' });
+  if (intelligence.schedule.workDaysPerWeek <= 0 || intelligence.schedule.shootDays < 0 || intelligence.schedule.prepWeeks < 0 || intelligence.schedule.wrapWeeks < 0) findings.push({ id: 'schedule-values', severity: 'critical', title: 'Calendario non valido', detail: 'Durate e giorni di lavoro devono essere positivi; i giorni per settimana non possono essere zero.' });
+  if (intelligence.cashFlow.some((entry) => entry.amount < 0)) findings.push({ id: 'cash-values', severity: 'critical', title: 'Movimenti di cassa negativi', detail: 'Usa Entrata/Uscita per la direzione e inserisci importi sempre positivi.' });
+  if (data.incentives.some((item) => item.rate < 0 || item.rate > 100 || (item.cap !== null && item.cap < 0))) findings.push({ id: 'incentive-values', severity: 'critical', title: 'Parametri fiscali non validi', detail: 'Le aliquote devono essere tra 0 e 100 e i massimali non possono essere negativi.' });
   if (data.items.some((item) => !item.location.trim())) findings.push({ id: 'locations', severity: 'warning', title: 'Location mancanti', detail: 'Le location sono necessarie per territorialità, incentivi e comparazione.' });
   if (!findings.length) findings.push({ id: 'healthy', severity: 'info', title: 'Controlli strutturali superati', detail: 'Non sono emerse anomalie automatiche. Resta necessaria la revisione professionale.' });
   return findings;
@@ -90,9 +94,10 @@ export function calculateCashFlow(entries: CashFlowEntry[]) {
   let balance = 0;
   let minimumBalance = 0;
   const timeline = ordered.map((entry) => {
-    balance += entry.type === 'inflow' ? entry.amount : -entry.amount;
+    const amount = Math.max(0, Number.isFinite(entry.amount) ? entry.amount : 0);
+    balance += entry.type === 'inflow' ? amount : -amount;
     minimumBalance = Math.min(minimumBalance, balance);
-    return { ...entry, balance };
+    return { ...entry, amount, balance };
   });
   return { timeline, closingBalance: balance, peakFundingNeed: Math.abs(minimumBalance) };
 }
