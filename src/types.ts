@@ -30,6 +30,7 @@ export interface FringeRule {
   rate: number;
   cap: number | null;
   kinds: LineKind[];
+  provenance?: RateProvenance;
 }
 
 export interface BudgetGroup {
@@ -55,6 +56,22 @@ export interface TaxIncentive {
   cap: number | null;
   locations: string[];
   kinds: LineKind[];
+  provenance?: RateProvenance;
+}
+
+export interface RateProvenance {
+  authority: string;
+  title: string;
+  sourceUrl: string;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  verifiedAt: string;
+}
+
+export interface RiskEstimate {
+  lowPercent: number;
+  highPercent: number;
+  note?: string;
 }
 
 export interface LineItem {
@@ -70,6 +87,45 @@ export interface LineItem {
   groupId: string | null;
   location: string;
   note: string;
+  entityId?: string | null;
+  rateProvenance?: RateProvenance;
+  risk?: RiskEstimate;
+}
+
+export interface ProjectJurisdiction {
+  countryCode: string;
+  countryName: string;
+  region: string;
+  effectiveDate: string;
+  euApplicable: boolean;
+  lastLegalCheckAt: string | null;
+  lastLegalQuery: string;
+}
+
+export interface ProductionEntity {
+  id: string;
+  name: string;
+  countryCode: string;
+  currency: string;
+  sharePercent: number;
+}
+
+export interface CashFlowEntry {
+  id: string;
+  date: string;
+  label: string;
+  type: 'inflow' | 'outflow';
+  amount: number;
+  status: 'forecast' | 'committed' | 'paid';
+  entityId?: string | null;
+}
+
+export interface ProjectIntelligence {
+  jurisdiction: ProjectJurisdiction;
+  productionEntities: ProductionEntity[];
+  cashFlow: CashFlowEntry[];
+  targetBudget: number | null;
+  benchmarkOptIn: boolean;
 }
 
 export interface BudgetData {
@@ -129,6 +185,7 @@ export interface BudgetProject {
   changeLog: ChangeLogEntry[];
   syncMode: 'local' | 'cloud';
   updatedAt: string;
+  intelligence?: ProjectIntelligence;
 }
 
 export interface ChangeLogEntry {
@@ -169,4 +226,4 @@ export interface IncentiveResult {
   amount: number;
 }
 
-export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries' | 'resources';
+export type AppView = 'topsheet' | 'budget' | 'globals' | 'fringes' | 'scenarios' | 'libraries' | 'resources' | 'compliance';

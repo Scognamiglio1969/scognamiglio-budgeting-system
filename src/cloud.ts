@@ -66,6 +66,38 @@ export interface SharedResource {
 
 export type SyncStatus = 'saved' | 'saving' | 'offline' | 'conflict' | 'error' | 'demo';
 
+export interface LegalSearchResult {
+  id: string;
+  title: string;
+  description: string;
+  authority: string;
+  sourceUrl: string;
+  actDate: string | null;
+  publicationDate: string | null;
+  officialGazette: string | null;
+  countryCode: string;
+}
+
+export interface LegalSearchResponse {
+  query: string;
+  countryCode: string;
+  checkedAt: string;
+  source: { name: string; url: string; official: true; mode: 'api' | 'portal' };
+  results: LegalSearchResult[];
+  total: number;
+  disclaimer: string;
+}
+
+export async function searchOfficialLegislation(countryCode: string, query: string, projectId?: string) {
+  if (!supabase) throw new Error('Cloud non configurato');
+  const { data, error } = await supabase.functions.invoke<LegalSearchResponse>('legal-search', {
+    body: { countryCode, query, projectId },
+  });
+  if (error) throw error;
+  if (!data) throw new Error('Risposta normativa vuota');
+  return data;
+}
+
 export function cloudErrorMessage(error: unknown) {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
     return error.message;

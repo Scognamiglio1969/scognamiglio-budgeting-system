@@ -49,7 +49,7 @@ export function createSeedData(): BudgetData {
       { id: 'global-contingency', symbol: 'CONTINGENCY', name: 'Contingency', value: 5, unit: '%', description: 'Planning reserve percentage' },
     ],
     fringes: [
-      { id: 'fringe-payroll', code: 'PAY', name: 'Payroll taxes', rate: 9.19, cap: null, kinds: ['labor'] },
+      { id: 'fringe-payroll', code: 'PAY', name: 'Payroll taxes', rate: 9.19, cap: null, kinds: ['labor'], provenance: { authority: 'INPS', title: 'Aliquota di lavoro — valore dimostrativo da verificare', sourceUrl: 'https://www.inps.it/', effectiveFrom: '2026-01-01', verifiedAt: '2026-07-19T10:00:00.000Z' } },
       { id: 'fringe-pension', code: 'PEN', name: 'Pension contribution', rate: 7.5, cap: 55000, kinds: ['labor'] },
       { id: 'fringe-insurance', code: 'INS', name: 'Workers insurance', rate: 2.25, cap: null, kinds: ['labor'] },
       { id: 'fringe-kit', code: 'EQI', name: 'Equipment insurance', rate: 1.5, cap: null, kinds: ['equipment'] },
@@ -67,7 +67,7 @@ export function createSeedData(): BudgetData {
       { id: 'fx-chf', currency: 'CHF', name: 'Swiss Franc', rateToBase: 1.039, updatedAt: '2026-07-19T10:00:00.000Z' },
     ],
     incentives: [
-      { id: 'incentive-italy', name: 'Italy production tax credit', jurisdiction: 'Italy', rate: 40, cap: 200000, locations: ['Rome', 'Tuscany', 'Milan'], kinds: ['labor', 'equipment', 'other'] },
+      { id: 'incentive-italy', name: 'Italy production tax credit', jurisdiction: 'Italy', rate: 40, cap: 200000, locations: ['Rome', 'Tuscany', 'Milan'], kinds: ['labor', 'equipment', 'other'], provenance: { authority: 'Ministero della Cultura — DGCA', title: 'Tax credit produzione — configurazione dimostrativa', sourceUrl: 'https://cinema.cultura.gov.it/cosa-facciamo/sostegni-economici/linee-di-sostegno/tax-credit/introduzione/', effectiveFrom: '2026-01-01', verifiedAt: '2026-07-19T10:00:00.000Z' } },
     ],
     items: [
       item('item-writer', 'cat-1100', 'Screenplay rights & writer', 'labor', '1', '1', '28000', 'group-nonunion', 'Rome'),
@@ -144,5 +144,20 @@ export function createSeedProject(): BudgetProject {
     changeLog: [{ id: 'change-initial', timestamp: '2026-07-19T10:00:00.000Z', label: 'Master budget created', scenarioId: 'scenario-base' }],
     syncMode: 'local',
     updatedAt: '2026-07-19T10:00:00.000Z',
+    intelligence: {
+      jurisdiction: { countryCode: 'IT', countryName: 'Italia', region: 'Lazio', effectiveDate: '2026-07-20', euApplicable: true, lastLegalCheckAt: null, lastLegalQuery: '' },
+      productionEntities: [
+        { id: 'entity-it', name: 'Produzione italiana', countryCode: 'IT', currency: 'EUR', sharePercent: 70 },
+        { id: 'entity-fr', name: 'Coproduttore francese', countryCode: 'FR', currency: 'EUR', sharePercent: 30 },
+      ],
+      cashFlow: [
+        { id: 'cash-1', date: '2026-08-01', label: 'Equity produttore', type: 'inflow', amount: 420000, status: 'committed', entityId: 'entity-it' },
+        { id: 'cash-2', date: '2026-08-15', label: 'Prep e depositi', type: 'outflow', amount: 180000, status: 'forecast', entityId: 'entity-it' },
+        { id: 'cash-3', date: '2026-09-01', label: 'Tranche coproduttore', type: 'inflow', amount: 240000, status: 'forecast', entityId: 'entity-fr' },
+        { id: 'cash-4', date: '2026-09-10', label: 'Riprese principali', type: 'outflow', amount: 390000, status: 'forecast', entityId: 'entity-it' },
+      ],
+      targetBudget: 900000,
+      benchmarkOptIn: false,
+    },
   };
 }

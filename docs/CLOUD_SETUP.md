@@ -19,9 +19,12 @@ Dal SQL Editor eseguire integralmente:
 
 ```text
 supabase/migrations/202607190001_cloud_platform.sql
+supabase/migrations/202607200001_legal_intelligence.sql
 ```
 
 Lo script crea profili, progetti, membri, budget, versioni e risorse condivise. Attiva le policy RLS e le funzioni atomiche di creazione, salvataggio e ripristino.
+
+La seconda migrazione aggiunge l'audit immutabile delle ricerche normative. Memorizza query, fonte, data e metadati dei risultati; non copia né considera autoritativo il testo della legge.
 
 ## 2. Creare il primo Admin
 
@@ -53,6 +56,7 @@ Distribuire la funzione:
 
 ```bash
 supabase functions deploy admin-create-user
+supabase functions deploy legal-search
 ```
 
 La funzione verifica che il chiamante sia Admin, genera una password casuale forte, crea l'utente, invia l'email e annulla la creazione se la consegna fallisce. Se Resend non è configurato, usa il flusso di recupero password di Supabase e mostra la password provvisoria una sola volta all'Admin. Per inviare email a utenti che non appartengono al team Supabase è comunque necessario configurare un SMTP personalizzato gratuito. Il database rimuove il flag `must_change_password` solo quando Supabase registra un vero cambio password.
@@ -72,6 +76,7 @@ Sono valori browser-safe, ma vengono gestiti come secret per tenere centralizzat
 - I metadati sono in `public.projects`.
 - Gli accessi sono in `public.project_members`.
 - Le risorse riutilizzabili sono in `public.shared_resources` e possono essere applicate a progetti diversi.
+- Le verifiche effettuate dal Legal & Intelligence Center sono in `public.legal_search_audit` e rispettano gli stessi permessi del progetto.
 - Ogni stato precedente è in `public.project_versions`.
 - Un conflitto di modifica viene salvato con `reason = 'conflict-recovery'` prima di mostrare l'avviso.
 - Il dispositivo conserva una copia cifrata non esportabile in IndexedDB; il vecchio prototipo locale non viene cancellato durante la migrazione.

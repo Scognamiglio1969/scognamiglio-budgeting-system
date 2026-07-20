@@ -18,6 +18,7 @@ import { Modal } from './components/Modal';
 import type { SyncStatus, UserProfile } from './cloud';
 import { VersionHistory } from './components/VersionHistory';
 import { SharedResourcesView } from './views/SharedResourcesView';
+import { ComplianceView } from './views/ComplianceView';
 
 const navItems: Array<{ id: AppView; label: string; description: string; icon: React.ReactNode }> = [
   { id: 'topsheet', label: 'Topsheet', description: 'Sintesi generale', icon: <BarChart3 size={18} /> },
@@ -27,6 +28,7 @@ const navItems: Array<{ id: AppView; label: string; description: string; icon: R
   { id: 'scenarios', label: 'Scenari', description: 'Confronti e storico', icon: <GitCompareArrows size={18} /> },
   { id: 'libraries', label: 'Librerie', description: 'Template riutilizzabili', icon: <LibraryBig size={18} /> },
   { id: 'resources', label: 'Risorse condivise', description: 'Tra tutti i progetti', icon: <Share2 size={18} /> },
+  { id: 'compliance', label: 'Legal & Intelligence', description: 'Normativa e controlli', icon: <ShieldCheck size={18} /> },
 ];
 
 function isBudgetProject(value: unknown): value is BudgetProject {
@@ -139,6 +141,7 @@ export default function App({
           {view === 'scenarios' && <ScenariosView project={project} money={money} commit={commit} />}
           {view === 'libraries' && <LibrariesView project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
           {view === 'resources' && <SharedResourcesView profile={profile} project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
+          {view === 'compliance' && <ComplianceView project={project} money={money} readOnly={readOnly} commit={commit} />}
         </div>
       </main>
 
