@@ -30,6 +30,7 @@ Explore a complete synthetic production budget without creating an account. The 
 - **Controlled collaboration:** Admin-managed users and project roles (`owner`, `editor`, `viewer`).
 - **Data ownership:** self-host the complete application and export an administrative JSON backup.
 - **Open format:** import/export SBS JSON, CSV, Excel and printable PDF reports.
+- **Source-first compliance:** project jurisdiction, official-law search, dated provenance and budget health checks.
 
 ## Feature overview
 
@@ -43,6 +44,9 @@ Explore a complete synthetic production budget without creating an account. The 
 - Reusable line-item, crew-rate, equipment, global, fringe and group libraries.
 - Encrypted IndexedDB recovery cache and optimistic cloud autosave.
 - Guided legacy `.mbd`/`.mmbx` migration path.
+- Country-aware **Legal & Intelligence Center** with a structured Normattiva connector for Italy.
+- Auditable legal searches, official-source links and a strict no-auto-apply workflow.
+- Rate and incentive provenance, coproduction shares, cash-flow pressure, target gap and risk range.
 
 ## Quick start
 
@@ -70,6 +74,7 @@ npm run build
 ## Architecture
 
 - `src/engine.ts` — formulas and calculation engine.
+- `src/intelligence.ts` — deterministic compliance, risk, cash-flow and target checks.
 - `src/types.ts` — budget data model.
 - `src/store.ts` — autosave, history, undo and redo.
 - `src/RootApp.tsx` — authentication, project workspace and cloud sync.
@@ -78,6 +83,13 @@ npm run build
 - `src/exporters.ts` — CSV, JSON and OpenXML Excel exports.
 - `supabase/migrations/` — PostgreSQL schema, RLS and version history.
 - `supabase/functions/` — privileged user administration functions.
+- `supabase/functions/legal-search/` — authenticated allowlisted official-source search.
+
+## Legal data integrity
+
+SBS does not treat a generic web result or AI-generated summary as law. Each project has a country, region and effective date; live searches are limited to curated institutional sources and store an audit record. Search results never alter fringes, tax incentives or budget values automatically. A user must review the primary source, record its provenance and approve the change.
+
+The Italian connector uses the official Normattiva Open Data API. Digital legal texts and SBS calculations remain informational: the competent official publication and qualified professional advice prevail. Additional country adapters can be added only after source, licensing, availability and result-link validation.
 
 ## Legacy compatibility
 

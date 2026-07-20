@@ -517,6 +517,58 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
 .resource-form textarea { width: 100%; padding: 9px; border: 1px solid #dedbe4; border-radius: 7px; resize: vertical; font-size: 11px; }
 .resource-form > p { font-size: 10px; line-height: 1.55; }
 
+/* Legal & production intelligence */
+.compliance-score { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 7px; font-size: 9px; font-weight: 700; }
+.compliance-score.ok { color: var(--green); background: var(--green-soft); }
+.compliance-score.warning { color: var(--red); background: var(--red-soft); }
+.legal-disclaimer { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 15px; padding: 13px 15px; border: 1px solid #ead9a9; border-radius: 10px; color: #775b14; background: #fff9e9; }
+.legal-disclaimer svg { flex: 0 0 auto; }
+.legal-disclaimer div { display: grid; gap: 3px; }
+.legal-disclaimer strong { font-size: 10px; }
+.legal-disclaimer span { font-size: 9px; line-height: 1.5; }
+.jurisdiction-panel, .legal-search-panel { margin-bottom: 15px; }
+.jurisdiction-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1.15fr; gap: 11px; padding: 0 18px 18px; }
+.jurisdiction-grid > label { display: grid; gap: 6px; }
+.jurisdiction-grid > label > span { color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.jurisdiction-grid select, .jurisdiction-grid input { min-height: 39px; padding: 0 10px; border: 1px solid #dedbe4; border-radius: 7px; background: #fff; font-size: 10px; }
+.authority-card { display: flex; min-height: 39px; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px; color: var(--purple); background: var(--purple-soft); }
+.authority-card > span { display: grid; gap: 2px; }
+.authority-card strong { font-size: 9px; }
+.authority-card small { color: #786ea4; font-size: 8px; }
+.last-check { display: inline-flex; align-items: center; gap: 5px; color: var(--green); font-size: 8px; }
+.legal-search-bar { display: flex; align-items: center; gap: 9px; margin: 0 18px 14px; padding: 6px 6px 6px 11px; border: 1px solid #dedbe4; border-radius: 9px; }
+.legal-search-bar > svg { color: var(--muted); }
+.legal-search-bar input { min-width: 0; flex: 1; border: 0; outline: 0; font-size: 11px; }
+.results-meta { display: flex; justify-content: space-between; padding: 8px 18px; color: var(--muted); background: #faf9fc; font-size: 8px; }
+.legal-results { border-top: 1px solid var(--line); }
+.legal-result { display: grid; grid-template-columns: 25px minmax(0, 1fr) 18px; align-items: start; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--line); color: inherit; text-decoration: none; }
+.legal-result:hover { background: #faf9ff; }
+.legal-result > svg { color: var(--purple); }
+.legal-result > span { display: grid; gap: 3px; }
+.legal-result strong { font-size: 10px; }
+.legal-result small { color: var(--muted); font-size: 8px; }
+.legal-result em { color: #77717d; font-size: 8px; font-style: normal; line-height: 1.4; }
+.legal-empty { display: flex; align-items: center; gap: 12px; margin: 0 18px 18px; padding: 16px; border-radius: 9px; color: var(--muted); background: #f7f6f9; }
+.legal-empty > svg { color: var(--purple); }
+.legal-empty > div { display: grid; gap: 4px; }
+.legal-empty strong { color: var(--ink); font-size: 10px; }
+.legal-empty span { font-size: 9px; line-height: 1.5; }
+.intelligence-grid { display: grid; grid-template-columns: 1.35fr .85fr; gap: 15px; }
+.finding-list { display: grid; gap: 7px; padding: 0 18px 18px; }
+.finding { display: flex; align-items: flex-start; gap: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; }
+.finding > span { display: grid; width: 27px; height: 27px; flex: 0 0 auto; place-items: center; border-radius: 7px; }
+.finding > div { display: grid; gap: 3px; }
+.finding strong { font-size: 9px; }
+.finding small { color: var(--muted); font-size: 8px; line-height: 1.45; }
+.finding.critical > span { color: var(--red); background: var(--red-soft); }
+.finding.warning > span { color: var(--amber); background: var(--amber-soft); }
+.finding.info > span { color: var(--green); background: var(--green-soft); }
+.intelligence-summary dl { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0; background: var(--line); }
+.intelligence-summary dl > div { display: grid; gap: 5px; padding: 15px; background: #fff; }
+.intelligence-summary dt { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 8px; }
+.intelligence-summary dd { margin: 0; font-size: 16px; font-weight: 700; }
+.intelligence-summary small { color: var(--muted); font-size: 8px; }
+
 @media (max-width: 1180px) {
   .metric-grid { grid-template-columns: repeat(2, 1fr); }
   .library-grid { grid-template-columns: repeat(2, 1fr); }
@@ -524,6 +576,7 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
   .save-library-form { grid-template-columns: 1fr 1fr; }
   .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .resource-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jurisdiction-grid { grid-template-columns: 1fr 1fr; }
   .admin-layout { grid-template-columns: 1fr; }
 }
 
@@ -543,6 +596,7 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
   .user-row { grid-template-columns: 35px minmax(120px, 1fr) auto; }
   .user-row .access-badge { display: none; }
   .resource-create-grid { grid-template-columns: 1fr; }
+  .intelligence-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 680px) {
@@ -583,6 +637,10 @@ h1, h2, h3, .metric-card strong, .brand-block strong { font-family: 'Manrope', '
   .resource-grid { grid-template-columns: 1fr; }
   .resource-toolbar { align-items: stretch; flex-direction: column; }
   .resource-toolbar .select-field { min-width: 0; }
+  .jurisdiction-grid { grid-template-columns: 1fr; }
+  .legal-search-bar { align-items: stretch; flex-wrap: wrap; }
+  .legal-search-bar input { min-height: 34px; }
+  .legal-search-bar button { width: 100%; justify-content: center; }
   .password-rules { grid-template-columns: 1fr; }
   .access-row { align-items: stretch; flex-direction: column; }
   .segmented-access { width: 100%; }
