@@ -150,13 +150,19 @@ export function evaluateBudget(data: BudgetData): EvaluatedItem[] {
 }
 
 export function calculateIncentives(data: BudgetData, items: EvaluatedItem[]): IncentiveResult[] {
-  return data.incentives.map((incentive) => {
+  const results = data.incentives.map((incentive) => {
     const eligibleCost = items
       .filter((entry) => incentive.kinds.includes(entry.item.kind) && incentive.locations.includes(entry.item.location))
       .reduce((sum, entry) => sum + entry.total, 0);
     const calculated = eligibleCost * (incentive.rate / 100);
     return { incentive, eligibleCost, amount: Math.max(0, Math.min(calculated, incentive.cap ?? calculated)) };
   });
+  const exclusive = results.filter((result) => result.incentive.stackable === false);
+  if (exclusive.length > 1) {
+    const winner = exclusive.reduce((best, result) => result.amount > best.amount ? result : best);
+    exclusive.forEach((result) => { if (result !== winner) result.amount = 0; });
+  }
+  return results;
 }
 
 export function sumEvaluated(items: EvaluatedItem[], incentive = 0): BudgetTotals {

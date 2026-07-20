@@ -3,3 +3,6 @@ verify_jwt = true
 
 [functions.legal-search]
 verify_jwt = true
+
+[functions.benchmark-submit]
+verify_jwt = true

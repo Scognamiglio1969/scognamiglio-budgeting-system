@@ -44,6 +44,10 @@ Esplora un budget di produzione completo con dati sintetici senza creare un acco
 - Cache di recupero IndexedDB cifrata e salvataggio cloud con controllo dei conflitti.
 - Percorso guidato per la migrazione dei file legacy `.mbd` e `.mmbx`.
 
+## Production Intelligence 1–12
+
+SBS include motore di coproduzione, ottimizzatore dei tax credit, simulazione Monte Carlo, Target Budget Solver, Schedule-to-Budget, cash-flow, Budget Health Check, provenienza delle tariffe, stanze reparto, Budget Branches con revisione e merge, Open SBS Standard 2.0 e benchmark anonimi volontari con soglia minima di cinque progetti. Il centro Legal & Intelligence collega paese, data di validità e fonti normative ufficiali senza modificare automaticamente il budget.
+
 ## Avvio rapido
 
 Requisiti: Node.js 20 o successivo e un progetto Supabase.

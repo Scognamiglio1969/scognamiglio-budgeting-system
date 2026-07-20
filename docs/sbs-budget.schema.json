@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scognamiglio1969.github.io/scognamiglio-budgeting-system/schemas/open-sbs-2.0.0.json",
+  "title": "Open SBS Budget Standard",
+  "description": "Portable production-budget envelope used by Scognamiglio Budgeting System.",
+  "type": "object",
+  "required": ["format", "schemaVersion", "exportedAt", "generator", "project"],
+  "properties": {
+    "format": { "const": "open-sbs-budget" },
+    "schemaVersion": { "const": "2.0.0" },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "generator": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" } },
+      "additionalProperties": false
+    },
+    "project": { "$ref": "#/$defs/project" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "project": {
+      "type": "object",
+      "required": ["id", "title", "company", "currency", "currencyLocale", "activeScenarioId", "scenarios", "libraries", "changeLog", "syncMode", "updatedAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "company": { "type": "string" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "currencyLocale": { "type": "string" },
+        "activeScenarioId": { "type": "string" },
+        "scenarios": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/scenario" } },
+        "libraries": { "type": "array" },
+        "changeLog": { "type": "array" },
+        "syncMode": { "enum": ["local", "cloud"] },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "intelligence": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "scenario": {
+      "type": "object",
+      "required": ["id", "name", "createdAt", "isBase", "scope", "data"],
+      "properties": {
+        "id": { "type": "string" }, "name": { "type": "string" }, "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }, "basedOn": { "type": ["string", "null"] },
+        "isBase": { "type": "boolean" }, "scope": { "type": "string" },
+        "branchStatus": { "enum": ["working", "review", "merged", "archived"] },
+        "data": { "$ref": "#/$defs/budgetData" }
+      },
+      "additionalProperties": true
+    },
+    "budgetData": {
+      "type": "object",
+      "required": ["accounts", "categories", "items", "globals", "fringes", "groups", "exchangeRates", "incentives"],
+      "properties": {
+        "accounts": { "type": "array" }, "categories": { "type": "array" }, "items": { "type": "array" },
+        "globals": { "type": "array" }, "fringes": { "type": "array" }, "groups": { "type": "array" },
+        "exchangeRates": { "type": "array" }, "incentives": { "type": "array" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

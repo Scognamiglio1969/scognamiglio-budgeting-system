@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import {
   BarChart3, ChevronDown, Cloud, Download, FileJson, FileSpreadsheet, GitCompareArrows,
   FolderKanban, History, LibraryBig, LogOut, Menu, PanelLeftClose, Percent, Printer, Redo2,
-  Share2, ShieldCheck, TableProperties, Undo2, Upload, UserRound, Variable, X,
+  Share2, ShieldCheck, Sparkles, TableProperties, Undo2, Upload, UserRound, Variable, X,
 } from 'lucide-react';
 import { useBudgetStore } from './store';
 import { createMoneyFormatter, relativeTime } from './helpers';
@@ -19,6 +19,8 @@ import type { SyncStatus, UserProfile } from './cloud';
 import { VersionHistory } from './components/VersionHistory';
 import { SharedResourcesView } from './views/SharedResourcesView';
 import { ComplianceView } from './views/ComplianceView';
+import { InnovationLabView } from './views/InnovationLabView';
+import { parseOpenSbsProject } from './openSbs';
 
 const navItems: Array<{ id: AppView; label: string; description: string; icon: React.ReactNode }> = [
   { id: 'topsheet', label: 'Topsheet', description: 'Sintesi generale', icon: <BarChart3 size={18} /> },
@@ -29,13 +31,8 @@ const navItems: Array<{ id: AppView; label: string; description: string; icon: R
   { id: 'libraries', label: 'Librerie', description: 'Template riutilizzabili', icon: <LibraryBig size={18} /> },
   { id: 'resources', label: 'Risorse condivise', description: 'Tra tutti i progetti', icon: <Share2 size={18} /> },
   { id: 'compliance', label: 'Legal & Intelligence', description: 'Normativa e controlli', icon: <ShieldCheck size={18} /> },
+  { id: 'lab', label: 'Production Lab', description: 'Motori avanzati 1–12', icon: <Sparkles size={18} /> },
 ];
-
-function isBudgetProject(value: unknown): value is BudgetProject {
-  if (!value || typeof value !== 'object') return false;
-  const project = value as Partial<BudgetProject>;
-  return typeof project.title === 'string' && Array.isArray(project.scenarios) && Array.isArray(project.libraries);
-}
 
 interface AppProps {
   initialProject: BudgetProject;
@@ -90,8 +87,8 @@ export default function App({
     }
     try {
       const parsed = JSON.parse(await file.text()) as unknown;
-      if (!isBudgetProject(parsed)) throw new Error('Struttura non riconosciuta');
-      commit((draft) => Object.assign(draft, parsed), `Project imported from ${file.name}`);
+      const imported = parseOpenSbsProject(parsed);
+      commit((draft) => Object.assign(draft, imported), `Open SBS project imported from ${file.name}`);
       setImportMessage('success');
     } catch {
       setImportMessage('error');
@@ -127,8 +124,8 @@ export default function App({
             <span className={`save-state save-${syncStatus}`}><span className="status-dot" /> {syncCopy[syncStatus].detail} · {relativeTime(project.updatedAt)}</span>
             <div className="undo-group"><button className="icon-button" disabled={!canUndo} onClick={undo} aria-label="Annulla"><Undo2 size={17} /></button><button className="icon-button" disabled={!canRedo} onClick={redo} aria-label="Ripristina"><Redo2 size={17} /></button></div>
             {!demoMode && <button className="icon-button" onClick={() => setVersionsOpen(true)} aria-label="Versioni cloud"><History size={17} /></button>}
-            {!demoMode && <><input ref={fileInput} className="sr-only" type="file" accept=".json,.mbd,.mmbx" onChange={(event) => event.target.files?.[0] && void importFile(event.target.files[0])} /><button className="button compact-button" onClick={() => fileInput.current?.click()}><Upload size={16} /> <span>Importa</span></button></>}
-            <div className="export-menu-wrap"><button className="button primary compact-button" onClick={() => setExportOpen(!exportOpen)}><Download size={16} /> <span>Esporta</span><ChevronDown size={14} /></button>{exportOpen && <div className="export-menu"><button onClick={() => { window.print(); setExportOpen(false); }}><Printer size={16} /><span><strong>PDF / Stampa</strong><small>Report Topsheet</small></span></button><button onClick={() => { exportScenarioXlsx(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>Microsoft Excel</strong><small>Foglio .xlsx completo</small></span></button><button onClick={() => { exportScenarioCsv(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>CSV universale</strong><small>Compatibile con fogli di calcolo</small></span></button><button onClick={() => { exportProjectJson(project); setExportOpen(false); }}><FileJson size={16} /><span><strong>Archivio SBS</strong><small>Progetto JSON completo</small></span></button></div>}</div>
+            {!demoMode && <><input ref={fileInput} className="sr-only" type="file" accept=".json,.mbd,.mmbx,application/vnd.open-sbs+json" onChange={(event) => event.target.files?.[0] && void importFile(event.target.files[0])} /><button className="button compact-button" onClick={() => fileInput.current?.click()}><Upload size={16} /> <span>Importa</span></button></>}
+            <div className="export-menu-wrap"><button className="button primary compact-button" onClick={() => setExportOpen(!exportOpen)}><Download size={16} /> <span>Esporta</span><ChevronDown size={14} /></button>{exportOpen && <div className="export-menu"><button onClick={() => { window.print(); setExportOpen(false); }}><Printer size={16} /><span><strong>PDF / Stampa</strong><small>Report Topsheet</small></span></button><button onClick={() => { exportScenarioXlsx(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>Microsoft Excel</strong><small>Foglio .xlsx completo</small></span></button><button onClick={() => { exportScenarioCsv(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>CSV universale</strong><small>Compatibile con fogli di calcolo</small></span></button><button onClick={() => { exportProjectJson(project); setExportOpen(false); }}><FileJson size={16} /><span><strong>Open SBS Standard</strong><small>Archivio JSON v2 interoperabile</small></span></button></div>}</div>
           </div>
         </header>
 
@@ -142,6 +139,7 @@ export default function App({
           {view === 'libraries' && <LibrariesView project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
           {view === 'resources' && <SharedResourcesView profile={profile} project={project} data={activeScenario.data} commit={commit} mutate={mutateActiveData} />}
           {view === 'compliance' && <ComplianceView project={project} money={money} readOnly={readOnly} commit={commit} />}
+          {view === 'lab' && <InnovationLabView project={project} money={money} readOnly={readOnly} commit={commit} />}
         </div>
       </main>
 
