@@ -8,7 +8,7 @@ SBS è una piattaforma open source per il budgeting di produzioni cinematografic
 
 ## Demo online
 
-Esplora un budget di produzione completo con dati sintetici senza creare un account. La demo pubblica è in sola lettura, non salva modifiche e non contiene dati reali di produzione.
+Esplora e modifica un budget di produzione completo con dati sintetici senza creare un account. La demo pubblica è una sandbox in memoria: tutti i controlli sono utilizzabili, nulla viene salvato nel cloud e i dati si ripristinano al ricaricamento.
 
 **[Apri la demo interattiva SBS →](https://scognamiglio1969.github.io/scognamiglio-budgeting-system/?demo=1)**
 

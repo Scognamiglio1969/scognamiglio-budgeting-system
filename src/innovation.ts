@@ -3,19 +3,19 @@ import { normalizeIntelligence } from './intelligence';
 import type { BudgetData, BudgetProject, LineItem, ProductionEntity } from './types';
 
 const activeData = (project: BudgetProject) => project.scenarios.find((item) => item.id === project.activeScenarioId)?.data ?? project.scenarios[0].data;
-const defaultFlexibility = (item: LineItem) => item.flexibilityPercent ?? ({ labor: 5, equipment: 15, travel: 12, other: 10 }[item.kind]);
+const defaultFlexibility = (item: LineItem) => Math.min(100, Math.max(0, item.flexibilityPercent ?? ({ labor: 5, equipment: 15, travel: 12, other: 10 }[item.kind])));
 
 export function calculateCoproductionAllocation(project: BudgetProject) {
   const intelligence = normalizeIntelligence(project.intelligence);
   const entries = evaluateBudget(activeData(project));
   const entities = intelligence.productionEntities;
-  const totalShares = entities.reduce((sum, entity) => sum + entity.sharePercent, 0) || 100;
+  const totalShares = entities.reduce((sum, entity) => sum + Math.max(0, entity.sharePercent), 0) || 100;
   const rows = entities.map((entity) => {
     let explicit = 0;
     let shared = 0;
     entries.forEach((entry) => {
       if (entry.item.entityId === entity.id) explicit += entry.total;
-      else if (!entry.item.entityId) shared += entry.total * entity.sharePercent / totalShares;
+      else if (!entry.item.entityId) shared += entry.total * Math.max(0, entity.sharePercent) / totalShares;
     });
     return { entity, explicit, shared, total: explicit + shared };
   });
@@ -49,6 +49,17 @@ export function optimizeTaxCredits(project: BudgetProject) {
   return { currentNet, optimizedNet, potentialSaving: Math.max(0, currentNet - optimizedNet), suggestions };
 }
 
+export function applyTaxOptimizationPlan(project: BudgetProject) {
+  const plan = optimizeTaxCredits(project);
+  const data = activeData(project);
+  let applied = 0;
+  plan.suggestions.forEach((suggestion) => {
+    const item = data.items.find((value) => value.id === suggestion.itemId);
+    if (item && item.location !== suggestion.to) { item.location = suggestion.to; applied += 1; }
+  });
+  return { applied, before: plan.currentNet, after: calculateBudgetTotals(data).net };
+}
+
 function mulberry32(seed: number) {
   return () => { let value = seed += 0x6D2B79F5; value = Math.imul(value ^ value >>> 15, value | 1); value ^= value + Math.imul(value ^ value >>> 7, value | 61); return ((value ^ value >>> 14) >>> 0) / 4294967296; };
 }
@@ -65,6 +76,7 @@ function triangular(random: () => number, minimum: number, mode: number, maximum
 const percentile = (sorted: number[], value: number) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.ceil(value * sorted.length) - 1))];
 
 export function simulateBudgetRisk(project: BudgetProject, iterations = 2000, seed = 1969) {
+  iterations = Math.min(100_000, Math.max(100, Math.round(iterations)));
   const data = activeData(project);
   const entries = evaluateBudget(data);
   const incentive = calculateBudgetTotals(data, entries).incentive;
@@ -97,18 +109,46 @@ export function solveTargetBudget(project: BudgetProject) {
   return { actual, target, required, remaining, feasible: remaining < .01, suggestions };
 }
 
+export function applyTargetBudgetPlan(project: BudgetProject) {
+  const plan = solveTargetBudget(project);
+  const data = activeData(project);
+  let applied = 0;
+  if (!plan.feasible) return { applied, before: plan.actual, after: plan.actual };
+  plan.suggestions.forEach((suggestion) => {
+    const item = data.items.find((value) => value.id === suggestion.itemId);
+    if (item) {
+      item.multiplier = `(${item.multiplier}) * ${(1 - suggestion.appliedPercent / 100).toFixed(6)}`;
+      applied += 1;
+    }
+  });
+  return { applied, before: plan.actual, after: calculateBudgetTotals(data).net };
+}
+
+export function applyPrudentRiskProfile(project: BudgetProject) {
+  const data = activeData(project);
+  data.items.forEach((item) => {
+    item.risk = { lowPercent: 0, highPercent: item.kind === 'travel' ? 15 : item.kind === 'equipment' ? 10 : 6 };
+  });
+  return data.items.length;
+}
+
 export function calculateScheduleImpact(project: BudgetProject) {
   const data = activeData(project);
   const schedule = normalizeIntelligence(project.intelligence).schedule;
+  const prepWeeks = Math.max(0, Number.isFinite(schedule.prepWeeks) ? schedule.prepWeeks : 0);
+  const shootDays = Math.max(0, Number.isFinite(schedule.shootDays) ? schedule.shootDays : 0);
+  const wrapWeeks = Math.max(0, Number.isFinite(schedule.wrapWeeks) ? schedule.wrapWeeks : 0);
+  const workDaysPerWeek = Math.max(1, Number.isFinite(schedule.workDaysPerWeek) ? schedule.workDaysPerWeek : 1);
   const proposed = structuredClone(data);
   const setGlobal = (symbol: string, value: number) => { const global = proposed.globals.find((item) => item.symbol === symbol); if (global) global.value = value; };
-  setGlobal('SHOOT_DAYS', schedule.shootDays);
-  setGlobal('PREP_WEEKS', schedule.prepWeeks);
-  setGlobal('DAYS_WEEK', schedule.workDaysPerWeek);
+  setGlobal('SHOOT_DAYS', shootDays);
+  setGlobal('PREP_WEEKS', prepWeeks);
+  setGlobal('DAYS_WEEK', workDaysPerWeek);
   const current = calculateBudgetTotals(data).net;
   const scheduled = calculateBudgetTotals(proposed).net;
-  const calendarDays = Math.ceil(schedule.prepWeeks * 7 + schedule.shootDays / schedule.workDaysPerWeek * 7 + schedule.wrapWeeks * 7);
-  const endDate = new Date(schedule.startDate || new Date().toISOString().slice(0, 10));
+  const calendarDays = Math.ceil(prepWeeks * 7 + shootDays / workDaysPerWeek * 7 + wrapWeeks * 7);
+  const parsedStart = new Date(schedule.startDate);
+  const endDate = Number.isNaN(parsedStart.getTime()) ? new Date() : parsedStart;
   endDate.setDate(endDate.getDate() + calendarDays);
   return { current, scheduled, delta: scheduled - current, calendarDays, endDate: endDate.toISOString().slice(0, 10), proposedData: proposed };
 }
@@ -138,8 +178,18 @@ export function buildAnonymousBenchmark(project: BudgetProject) {
 }
 
 export function applyScheduleToData(target: BudgetData, project: BudgetProject) {
-  const proposed = calculateScheduleImpact(project).proposedData;
-  target.globals = proposed.globals;
+  const schedule = normalizeIntelligence(project.intelligence).schedule;
+  const values = [
+    { symbol: 'SHOOT_DAYS', name: 'Shooting days', value: Math.max(0, Number.isFinite(schedule.shootDays) ? schedule.shootDays : 0), unit: 'days', description: 'Principal photography days' },
+    { symbol: 'PREP_WEEKS', name: 'Prep weeks', value: Math.max(0, Number.isFinite(schedule.prepWeeks) ? schedule.prepWeeks : 0), unit: 'weeks', description: 'Standard department preparation' },
+    { symbol: 'DAYS_WEEK', name: 'Working week', value: Math.max(1, Number.isFinite(schedule.workDaysPerWeek) ? schedule.workDaysPerWeek : 1), unit: 'days', description: 'Paid days in a standard week' },
+  ];
+  values.forEach((next) => {
+    const existing = target.globals.find((item) => item.symbol === next.symbol);
+    if (existing) existing.value = next.value;
+    else target.globals.push({ id: `global-${next.symbol.toLowerCase()}-${Date.now()}`, ...next });
+  });
+  return values;
 }
 
 export function entityLabel(entities: ProductionEntity[], id?: string | null) {
