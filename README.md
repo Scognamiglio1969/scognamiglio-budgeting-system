@@ -29,7 +29,7 @@ Explore and modify a complete synthetic production budget without creating an ac
 - **Multi-project workspace:** separate budgets with shared departments, rates, packages and templates.
 - **Controlled collaboration:** Admin-managed users and project roles (`owner`, `editor`, `viewer`).
 - **Data ownership:** self-host the complete application and export an administrative JSON backup.
-- **Open format:** import/export SBS JSON, CSV, Excel and printable PDF reports.
+- **Professional reporting:** configurable Excel, Word, PDF and PowerPoint reports, plus SBS JSON and CSV data exports.
 - **Source-first compliance:** project jurisdiction, official-law search, dated provenance and budget health checks.
 
 ## Feature overview
@@ -47,6 +47,7 @@ Explore and modify a complete synthetic production budget without creating an ac
 - Country-aware **Legal & Intelligence Center** with a structured Normattiva connector for Italy.
 - Auditable legal searches, official-source links and a strict no-auto-apply workflow.
 - Rate and incentive provenance, coproduction shares, cash-flow pressure, target gap and risk range.
+- Report builder with full/custom modes and format-aware sections. Excel uses one worksheet per analysis and includes pre-production, production and post-production totals plus workdays, workweeks and person-days by department and role.
 
 ## Production Intelligence — 12 moduli
 
@@ -97,7 +98,8 @@ npm run build
 - `src/RootApp.tsx` — authentication, project workspace and cloud sync.
 - `src/secureCache.ts` — AES-GCM encrypted IndexedDB recovery cache.
 - `src/views/` — operational budgeting views.
-- `src/exporters.ts` — CSV, JSON and OpenXML Excel exports.
+- `src/reporting.ts` — shared report model, production phases and analytical sections.
+- `src/exporters.ts` — native Excel, Word, PDF, PowerPoint, CSV and JSON exports.
 - `supabase/migrations/` — PostgreSQL schema, RLS and version history.
 - `supabase/functions/` — privileged user administration functions.
 - `supabase/functions/legal-search/` — authenticated allowlisted official-source search.
