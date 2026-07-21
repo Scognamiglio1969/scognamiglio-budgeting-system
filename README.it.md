@@ -29,7 +29,7 @@ Esplora e modifica un budget di produzione completo con dati sintetici senza cre
 - **Ambiente multi-progetto:** budget separati con reparti, tariffe, pacchetti e modelli condivisi.
 - **Collaborazione controllata:** utenti creati dall'Admin e ruoli `owner`, `editor`, `viewer`.
 - **Proprietà dei dati:** installazione autonoma ed esportazione completa del backup amministrativo.
-- **Formati aperti:** SBS JSON, CSV, Excel e report PDF stampabili.
+- **Report professionali:** esportazioni configurabili Excel, Word, PDF e PowerPoint, oltre ai dati SBS JSON e CSV.
 
 ## Funzioni principali
 

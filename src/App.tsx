@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import {
-  BarChart3, ChevronDown, Cloud, Download, FileJson, FileSpreadsheet, GitCompareArrows,
-  FolderKanban, History, LibraryBig, LogOut, Menu, PanelLeftClose, Percent, Printer, Redo2,
+  BarChart3, ChevronDown, Cloud, Download, FileJson, GitCompareArrows,
+  FolderKanban, History, LibraryBig, LogOut, Menu, PanelLeftClose, Percent, Redo2,
   Share2, ShieldCheck, Sparkles, TableProperties, Undo2, Upload, UserRound, Variable, X,
 } from 'lucide-react';
 import { useBudgetStore } from './store';
 import { createMoneyFormatter, relativeTime } from './helpers';
-import { exportProjectJson, exportScenarioCsv, exportScenarioXlsx } from './exporters';
+import { exportProjectJson, exportReportDocx, exportReportPdf, exportReportPptx, exportReportXlsx, exportScenarioCsv } from './exporters';
 import type { AppView, BudgetProject } from './types';
 import { TopsheetView } from './views/TopsheetView';
 import { BudgetView } from './views/BudgetView';
@@ -21,6 +21,8 @@ import { SharedResourcesView } from './views/SharedResourcesView';
 import { ComplianceView } from './views/ComplianceView';
 import { InnovationLabView } from './views/InnovationLabView';
 import { parseOpenSbsProject } from './openSbs';
+import { ExportReportModal } from './components/ExportReportModal';
+import { buildBudgetReport, type ReportOptions } from './reporting';
 
 const navItems: Array<{ id: AppView; label: string; description: string; icon: React.ReactNode }> = [
   { id: 'topsheet', label: 'Topsheet', description: 'Sintesi generale', icon: <BarChart3 size={18} /> },
@@ -97,6 +99,14 @@ export default function App({
     }
   };
 
+  const generateReport = async (options: ReportOptions) => {
+    const report = buildBudgetReport(project, activeScenario, options);
+    if (options.format === 'xlsx') exportReportXlsx(report);
+    if (options.format === 'docx') await exportReportDocx(report);
+    if (options.format === 'pdf') await exportReportPdf(report);
+    if (options.format === 'pptx') await exportReportPptx(report);
+  };
+
   return (
     <div className="app-shell">
       <aside className={`sidebar ${sidebarOpen ? 'mobile-open' : ''}`}>
@@ -125,7 +135,7 @@ export default function App({
             <div className="undo-group"><button className="icon-button" disabled={!canUndo} onClick={undo} aria-label="Annulla"><Undo2 size={17} /></button><button className="icon-button" disabled={!canRedo} onClick={redo} aria-label="Ripristina"><Redo2 size={17} /></button></div>
             {!demoMode && <button className="icon-button" onClick={() => setVersionsOpen(true)} aria-label="Versioni cloud"><History size={17} /></button>}
             {!demoMode && <><input ref={fileInput} className="sr-only" type="file" accept=".json,.mbd,.mmbx,application/vnd.open-sbs+json" onChange={(event) => event.target.files?.[0] && void importFile(event.target.files[0])} /><button className="button compact-button" onClick={() => fileInput.current?.click()}><Upload size={16} /> <span>Importa</span></button></>}
-            <div className="export-menu-wrap"><button className="button primary compact-button" onClick={() => setExportOpen(!exportOpen)}><Download size={16} /> <span>Esporta</span><ChevronDown size={14} /></button>{exportOpen && <div className="export-menu"><button onClick={() => { window.print(); setExportOpen(false); }}><Printer size={16} /><span><strong>PDF / Stampa</strong><small>Report Topsheet</small></span></button><button onClick={() => { exportScenarioXlsx(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>Microsoft Excel</strong><small>Foglio .xlsx completo</small></span></button><button onClick={() => { exportScenarioCsv(project, activeScenario); setExportOpen(false); }}><FileSpreadsheet size={16} /><span><strong>CSV universale</strong><small>Compatibile con fogli di calcolo</small></span></button><button onClick={() => { exportProjectJson(project); setExportOpen(false); }}><FileJson size={16} /><span><strong>Open SBS Standard</strong><small>Archivio JSON v2 interoperabile</small></span></button></div>}</div>
+            <button className="button primary compact-button" onClick={() => setExportOpen(true)}><Download size={16} /> <span>Esporta</span></button>
           </div>
         </header>
 
@@ -146,6 +156,7 @@ export default function App({
 
       {importMessage && <Modal title={importMessage === 'success' ? 'Importazione completata' : importMessage === 'legacy' ? 'Bridge MMB legacy' : 'File non riconosciuto'} onClose={() => setImportMessage(null)}>{importMessage === 'success' && <div className="dialog-message success-message"><FileJson size={24} /><p>Il progetto SBS è stato importato ed è in coda per il salvataggio cloud.</p></div>}{importMessage === 'error' && <div className="dialog-message error-message"><p>Il file non contiene un archivio SBS valido. Esporta il progetto in formato JSON e riprova.</p></div>}{importMessage === 'legacy' && <div className="dialog-message legacy-message"><PanelLeftClose size={24} /><div><p><strong>I file .mbd e .mmbx sono formati proprietari.</strong></p><p>Per evitare conversioni incomplete, esporta il budget da Movie Magic come <strong>JSON Advanced</strong>. Il bridge SBS manterrà account, dettagli, globali, fringe, gruppi e location; il mapping diretto del binario legacy verrà abilitato dopo la validazione su un file campione.</p></div></div>}<div className="modal-actions"><button className="button primary" onClick={() => setImportMessage(null)}>Ho capito</button></div></Modal>}
       {versionsOpen && <VersionHistory projectId={project.id} onClose={() => setVersionsOpen(false)} onRestored={(restored, version) => { onRestored(restored, version); setVersionsOpen(false); }} />}
+      {exportOpen && <ExportReportModal projectTitle={project.title} scenarioName={activeScenario.name} onClose={() => setExportOpen(false)} onGenerate={generateReport} onExportCsv={() => exportScenarioCsv(project, activeScenario)} onExportOpenSbs={() => exportProjectJson(project)} />}
     </div>
   );
 }
